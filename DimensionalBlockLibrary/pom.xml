@@ -1,0 +1,53 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<properties>
+		<master.version>1</master.version>
+	</properties>
+
+	<parent>
+		<groupId>com.aaaaahhhhhhh.bananapuncher714</groupId>
+		<artifactId>DimensionalBlockLibrary_Master</artifactId>
+		<version>1</version>
+	</parent>
+	<artifactId>DimensionalBlockLibrary</artifactId>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-assembly-plugin</artifactId>
+				<version>2.4.1</version>
+				<configuration>
+					<descriptorRefs>
+						<descriptorRef>jar-with-dependencies</descriptorRef>
+					</descriptorRefs>
+				</configuration>
+				<executions>
+					<execution>
+						<id>make-assembly</id>
+						<phase>package</phase>
+						<goals>
+							<goal>single</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
+
+	<dependencies>
+		<dependency>
+			<groupId>com.aaaaahhhhhhh.bananapuncher714</groupId>
+			<artifactId>DimensionalBlockLibrary_Main</artifactId>
+			<version>${master.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.aaaaahhhhhhh.bananapuncher714</groupId>
+			<artifactId>DimensionalBlockLibrary_v1_15_R1</artifactId>
+			<version>${master.version}</version>
+		</dependency>
+	</dependencies>
+</project>
