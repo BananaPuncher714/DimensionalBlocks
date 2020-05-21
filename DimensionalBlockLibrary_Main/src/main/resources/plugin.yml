@@ -1,0 +1,7 @@
+name: DimensionalBlocks
+main: com.aaaaahhhhhhh.bananapuncher714.dimensional.block.library.DimensionalBlocks
+version: 1.0.0
+description: Add custom blocks to Spigot
+author: BananaPuncher714
+api-version: 1.13
+load: STARTUP
