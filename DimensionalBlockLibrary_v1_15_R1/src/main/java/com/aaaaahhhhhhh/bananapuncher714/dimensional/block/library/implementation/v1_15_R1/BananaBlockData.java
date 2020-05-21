@@ -1,5 +1,7 @@
 package com.aaaaahhhhhhh.bananapuncher714.dimensional.block.library.implementation.v1_15_R1;
 
+import org.bukkit.block.data.BlockData;
+
 import com.aaaaahhhhhhh.bananapuncher714.dimensional.block.library.api.DBlock;
 import com.aaaaahhhhhhh.bananapuncher714.dimensional.block.library.api.DBlockData;
 import com.aaaaahhhhhhh.bananapuncher714.dimensional.block.library.api.DState;
@@ -24,13 +26,24 @@ public class BananaBlockData implements DBlockData {
     }
 
     @Override
-    public < T extends Comparable< T > > void set( DState< T > state, T value ) {
+    public < T extends Comparable< T > > DBlockData set( DState< T > state, T value ) {
         data = block.set( state, value, data );
+        return this;
     }
 
     @Override
     public DBlock getBlock() {
         return block.getBlock();
+    }
+    
+    @Override
+    public void setAsDefault() {
+        block.setAsDefault( data );
+    }
+    
+    @Override
+    public void setClientBlock( BlockData craftData ) {
+        NMSHandler.setRegistryBlockId( data, craftData );
     }
     
     protected IBlockData getData() {

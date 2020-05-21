@@ -28,7 +28,7 @@ public abstract class DState< T extends Comparable< T > > {
 		}
 		
 		if ( obj instanceof DState ) {
-			DState state = ( DState ) obj;
+			DState< ? > state = ( DState< ? > ) obj;
 			
 			return state.clazz == clazz && state.id.equals( id );
 		}

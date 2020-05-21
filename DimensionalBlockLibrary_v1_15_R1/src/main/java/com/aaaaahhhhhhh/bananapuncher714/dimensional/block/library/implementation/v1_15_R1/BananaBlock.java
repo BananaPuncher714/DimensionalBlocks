@@ -8,19 +8,28 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.bukkit.Location;
 import org.bukkit.craftbukkit.v1_15_R1.block.data.CraftBlockData;
+import org.bukkit.entity.HumanEntity;
 
 import com.aaaaahhhhhhh.bananapuncher714.dimensional.block.library.api.DBlock;
 import com.aaaaahhhhhhh.bananapuncher714.dimensional.block.library.api.DInfo;
 import com.aaaaahhhhhhh.bananapuncher714.dimensional.block.library.api.DState;
+import com.aaaaahhhhhhh.bananapuncher714.dimensional.block.library.api.world.CollisionResultBlock;
 
 import net.minecraft.server.v1_15_R1.Block;
 import net.minecraft.server.v1_15_R1.BlockPosition;
 import net.minecraft.server.v1_15_R1.BlockStateList;
 import net.minecraft.server.v1_15_R1.Entity;
+import net.minecraft.server.v1_15_R1.EntityHuman;
+import net.minecraft.server.v1_15_R1.EnumHand;
+import net.minecraft.server.v1_15_R1.EnumInteractionResult;
 import net.minecraft.server.v1_15_R1.EnumPistonReaction;
+import net.minecraft.server.v1_15_R1.IBlockAccess;
 import net.minecraft.server.v1_15_R1.IBlockData;
 import net.minecraft.server.v1_15_R1.Material;
 import net.minecraft.server.v1_15_R1.MaterialMapColor;
+import net.minecraft.server.v1_15_R1.MovingObjectPositionBlock;
+import net.minecraft.server.v1_15_R1.VoxelShape;
+import net.minecraft.server.v1_15_R1.VoxelShapeCollision;
 import net.minecraft.server.v1_15_R1.World;
 
 public class BananaBlock extends Block {
@@ -58,10 +67,43 @@ public class BananaBlock extends Block {
 		initializeStates( block );
 	}
 	
+	// Expose these methods to the user
+	
 	@Override
 	public void stepOn( World world, BlockPosition position, Entity entity ) {
 	    Location location = new Location( world.getWorld(), position.getX(), position.getY(), position.getZ() );
 	    block.stepOn( location, entity.getBukkitEntity() );
+	}
+	
+	// On player right click
+	@Override
+	public EnumInteractionResult interact( IBlockData iblockdata, World world, BlockPosition position, EntityHuman entityhuman, EnumHand enumhand, MovingObjectPositionBlock movingobjectpositionblock ) {
+	    Location location = new Location( world.getWorld(), position.getX(), position.getY(), position.getZ() );
+	    BananaBlockData data = new BananaBlockData( iblockdata );
+	    HumanEntity entity = entityhuman.getBukkitEntity();
+	    CollisionResultBlock collision = NMSHandler.getResultFrom( world, movingobjectpositionblock );
+	    
+	    return EnumInteractionResult.valueOf( block.interact( data, location, entity, enumhand == EnumHand.MAIN_HAND, collision ).name() );
+	}
+	
+	// On projectile hit
+	@Override
+	public void a( World world, IBlockData iblockdata, MovingObjectPositionBlock movingobjectpositionblock, Entity entity ) {
+	    
+	}
+
+	// The rest of the methods here are for interal use
+	
+	@Override
+	public VoxelShape a( IBlockData iblockdata, IBlockAccess iblockaccess, BlockPosition blockposition, VoxelShapeCollision voxelshapecollision ) {
+	    IBlockData subData = NMSHandler.getFor( iblockdata );
+	    if ( subData == null ) {
+	        return super.a( iblockdata, iblockaccess, blockposition, voxelshapecollision );
+	    }
+	    // This is only a temporary fix until I can find a better solution
+	    // It doesn't appear to work nicely with all blocks, and the resulting
+	    // hitboxes of the surrounding blocks may be wrong or such
+	    return subData.getCollisionShape( iblockaccess, blockposition );
 	}
 	
     @Override
@@ -76,11 +118,11 @@ public class BananaBlock extends Block {
 	
 	public < T extends Comparable< T > > T get( DState< T > state, IBlockData data ) {
 	    String id = state.getId();
-	    BananaState bState = states.get( id );
+	    BananaState< ? > bState = states.get( id );
 	    if ( bState == null ) {
 	        throw new IllegalArgumentException( "State not part of this block!" );
 	    }
-	    DState dState = bState.getState();
+	    DState< ? > dState = bState.getState();
 	    if ( dState.equals( state ) ) {
 	        return ( T ) data.get( bState );
 	    } else {
@@ -90,16 +132,20 @@ public class BananaBlock extends Block {
 	
 	public < T extends Comparable< T > > IBlockData set( DState< T > state, T value, IBlockData data ) {
 	    String id = state.getId();
-        BananaState bState = states.get( id );
+        BananaState< T > bState = ( BananaState< T > ) states.get( id );
         if ( bState == null ) {
             throw new IllegalArgumentException( "State not part of this block!" );
         }
-	    DState dState = bState.getState();
+	    DState< T > dState = bState.getState();
 	    if ( dState.equals( state ) ) {
 	        return data.set( bState, value );
 	    } else {
 	        throw new IllegalArgumentException( "Requested Invalid State" );
 	    }
+	}
+	
+	protected void setAsDefault( IBlockData data ) {
+	    p( data );
 	}
 	
 	private void initializeStates( DBlock block ) {

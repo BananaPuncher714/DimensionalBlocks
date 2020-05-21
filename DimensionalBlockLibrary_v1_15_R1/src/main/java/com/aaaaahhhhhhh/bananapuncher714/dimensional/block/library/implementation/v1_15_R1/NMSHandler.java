@@ -10,6 +10,8 @@ import java.util.function.Supplier;
 
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.block.BlockFace;
+import org.bukkit.block.data.BlockData;
 import org.bukkit.craftbukkit.v1_15_R1.CraftWorld;
 import org.bukkit.craftbukkit.v1_15_R1.block.CraftBlock;
 import org.bukkit.craftbukkit.v1_15_R1.block.data.CraftBlockData;
@@ -19,14 +21,18 @@ import com.aaaaahhhhhhh.bananapuncher714.dimensional.block.library.api.DBlock;
 import com.aaaaahhhhhhh.bananapuncher714.dimensional.block.library.api.DBlockData;
 import com.aaaaahhhhhhh.bananapuncher714.dimensional.block.library.api.DInfo;
 import com.aaaaahhhhhhh.bananapuncher714.dimensional.block.library.api.DTileEntity;
+import com.aaaaahhhhhhh.bananapuncher714.dimensional.block.library.api.world.CollisionResultBlock;
 
 import net.minecraft.server.v1_15_R1.Block;
 import net.minecraft.server.v1_15_R1.BlockPosition;
 import net.minecraft.server.v1_15_R1.IBlockData;
 import net.minecraft.server.v1_15_R1.IRegistry;
 import net.minecraft.server.v1_15_R1.MinecraftKey;
+import net.minecraft.server.v1_15_R1.MovingObjectPositionBlock;
 import net.minecraft.server.v1_15_R1.RegistryBlockID;
+import net.minecraft.server.v1_15_R1.TileEntity;
 import net.minecraft.server.v1_15_R1.TileEntityTypes;
+import net.minecraft.server.v1_15_R1.Vec3D;
 import net.minecraft.server.v1_15_R1.World;
 
 public class NMSHandler implements com.aaaaahhhhhhh.bananapuncher714.dimensional.block.library.api.NMSHandler {
@@ -47,12 +53,12 @@ public class NMSHandler implements com.aaaaahhhhhhh.bananapuncher714.dimensional
         }
     }
     
-    private Map< DTileEntity, Set< Block > > tileEntityBlocks = new HashMap< DTileEntity, Set< Block > >();
+    private Map< String, Set< Block > > tileEntityBlocks = new HashMap< String, Set< Block > >();
     
     @Override
-    public boolean register( DBlock block, DTileEntity tileEntity ) {
+    public boolean register( DBlock block, Supplier< DTileEntity > tileEntity, String id ) {
         // Add a new tile entity
-        Supplier< BananaTileEntity > supplier = () -> { return new BananaTileEntity( IRegistry.BLOCK_ENTITY_TYPE.get( new MinecraftKey( tileEntity.getId() ) ), tileEntity ); };
+        Supplier< BananaTileEntity > supplier = () -> { return new BananaTileEntity( id, tileEntity.get() ); };
         // Set the DBlock for this thread while we call the constructor
         long threadId = Thread.currentThread().getId();
         BananaBlock.GLOBAL_BLOCK_MAP.put( threadId, block );
@@ -60,12 +66,12 @@ public class NMSHandler implements com.aaaaahhhhhhh.bananapuncher714.dimensional
         BananaBlock.GLOBAL_BLOCK_MAP.remove( threadId );
 
         Set< Block > blocks = tileEntityBlocks.getOrDefault( tileEntity, new HashSet< Block >() );
-        tileEntityBlocks.put( tileEntity, blocks );
+        tileEntityBlocks.put( id, blocks );
 
         blocks.add( nmsBlock );
 
         TileEntityTypes< BananaTileEntity > tileEntityType = new TileEntityTypes< BananaTileEntity >( supplier, blocks, null );
-        IRegistry.a( IRegistry.BLOCK_ENTITY_TYPE, tileEntity.getId(), tileEntityType );
+        IRegistry.a( IRegistry.BLOCK_ENTITY_TYPE, id, tileEntityType );
 	    
 	    return register( nmsBlock, block );
 	}
@@ -98,7 +104,27 @@ public class NMSHandler implements com.aaaaahhhhhhh.bananapuncher714.dimensional
             BLOCK_ID_MAP.put( state, id );
         }
 
+        // Let the block do whatever steps it needs
+        block.onRegister();
+        
         return true;
+	}
+	
+	protected static void setRegistryBlockId( IBlockData data, BlockData craftData ) {
+	    IBlockData state = ( ( CraftBlockData ) craftData ).getState();
+	    BLOCK_ID_MAP.put( data, BLOCK_ID_MAP.get( state ) );
+	}
+	
+	protected static IBlockData getFor( IBlockData data ) {
+	    return Block.REGISTRY_ID.fromId( Block.REGISTRY_ID.getId( data ) );
+	}
+	
+	protected static CollisionResultBlock getResultFrom( World world, MovingObjectPositionBlock position ) {
+	    CraftBlock block = CraftBlock.at( world, position.getBlockPosition() );
+	    BlockFace face = CraftBlock.notchToBlockFace( position.getDirection() );
+	    Vec3D fin = position.getPos();
+	    Location interception = new Location( world.getWorld(), fin.getX(), fin.getY(), fin.getZ() );
+	    return new CollisionResultBlock( interception, face, block );
 	}
 	
 	@Override
@@ -128,5 +154,26 @@ public class NMSHandler implements com.aaaaahhhhhhh.bananapuncher714.dimensional
 	    if ( data instanceof BananaBlockData ) {
 	        world.setTypeUpdate( position, ( ( BananaBlockData ) data ).getData() );
 	    }
+	}
+	
+	@Override
+	public DBlockData getDefaultBlockDataFor( DBlock block ) {
+	    Block nmsBlock = IRegistry.BLOCK.get( new MinecraftKey( block.getKey().toString() ) );
+	    if ( nmsBlock == null ) {
+	        throw new IllegalArgumentException( block.getKey().toString() + " has not been registered!" );
+	    }
+	    
+	    return new BananaBlockData( nmsBlock.getBlockData() );
+	}
+	
+	@Override
+	public DTileEntity getDTileEntityAt( Location location ) {
+	    World world = ( ( CraftWorld ) location.getWorld() ).getHandle();
+	    BlockPosition position = new BlockPosition( location.getBlockX(), location.getBlockY(), location.getBlockZ() );
+	    TileEntity ent = world.getTileEntity( position );
+	    if ( ent instanceof BananaTileEntity ) {
+	        return ( ( BananaTileEntity ) ent ).getTileEntity();
+	    }
+	    return null;
 	}
 }
