@@ -25,7 +25,7 @@ public class MagicalPlanks extends DBlock {
 	private static final ArbitraryInteger STATE = new ArbitraryInteger( "test" );
 	
 	public MagicalPlanks() {
-		super( NamespacedKey.minecraft( "magical_wood" ) );
+		super( new DInfo( NamespacedKey.minecraft( "magical_wood" ), Material.BOOKSHELF.createBlockData() ).setExplosionResistance( 600 ).setMapColor( Color.BLACK ) );
 	}
 	
 	@Override
@@ -60,11 +60,6 @@ public class MagicalPlanks extends DBlock {
 		update( data, location );
 	}
 	
-	@Override
-	public DInfo getBlockInfo() {
-		return new DInfo( Material.BOOKSHELF.createBlockData() ).setExplosionStrength( 600 ).setMapColor( Color.BLACK );
-	}
-
 	@Override
 	public DState< ? >[] getStates() {
 		return new DState< ? >[] { STATE };

@@ -6,6 +6,7 @@ import java.util.Random;
 import org.bukkit.Location;
 import org.bukkit.NamespacedKey;
 import org.bukkit.block.BlockFace;
+import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.HumanEntity;
 
@@ -13,14 +14,22 @@ import com.aaaaahhhhhhh.bananapuncher714.dimensional.block.library.DimensionalBl
 import com.aaaaahhhhhhh.bananapuncher714.dimensional.block.library.api.world.CollisionResultBlock;
 
 public abstract class DBlock {
-	private final NamespacedKey key;
+	private final DInfo info;
 	
-	public DBlock( NamespacedKey key ) {
-		this.key = key;
+	public DBlock( DInfo info ) {
+		this.info = info;
 	}
 	
 	public final NamespacedKey getKey() {
-		return key;
+		return info.getKey();
+	}
+	
+	public final DInfo getInfo() {
+		return info;
+	}
+	
+	public final BlockData getData() {
+		return info.getBlockData();
 	}
 	
 	public final DBlockData getDefaultBlockData() {
@@ -40,22 +49,25 @@ public abstract class DBlock {
 	}
 	
 	public boolean destroyedByFluid( DBlockData data, String fluid ) {
-		return false;
+		return info.isDestroyableByFluid();
 	}
 	
 	public boolean causesSuffocation( DBlockData data ) {
-		return true;
+		return info.isCausesSuffocation();
 	}
 	
 	public float getExplosionResistance() {
-		return getBlockInfo().getExplosionResistance();
+		return info.getExplosionResistance();
 	}
 	
 	public Color getMapColor( DBlockData data ) {
-		return getBlockInfo().getMapColor();
+		return info.getMapColor();
 	}
 	
-	public abstract DInfo getBlockInfo();
+	public PistonReaction getPistonReaction( DBlockData data ) {
+		return info.getPistonReaction();
+	}
+	
 	public abstract DState< ? >[] getStates();
 	
 	public static void update( DBlockData block, Location location ) {

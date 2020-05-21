@@ -82,6 +82,12 @@ public class BananaBlock extends Block {
 	// Expose these methods to the user
 	
 	@Override
+	public EnumPistonReaction getPushReaction( IBlockData iblockdata ) {
+	    BananaBlockData data = new BananaBlockData( iblockdata );
+	    return EnumPistonReaction.valueOf( block.getPistonReaction( data ).name() );
+	}
+	
+	@Override
 	public MaterialMapColor e( IBlockData iblockdata, IBlockAccess access, BlockPosition position ) {
 	    BananaBlockData data = new BananaBlockData( iblockdata );
 	    Color color = block.getMapColor( data );
@@ -257,7 +263,7 @@ public class BananaBlock extends Block {
 	}
 	
 	private static Info getInfoFrom( DBlock block ) {
-		DInfo info = block.getBlockInfo();
+		DInfo info = block.getInfo();
 
 		Color color = info.getMapColor();
 		Material.a material = new Material.a( computeNearest( color.getRed(), color.getGreen(), color.getBlue() ) );

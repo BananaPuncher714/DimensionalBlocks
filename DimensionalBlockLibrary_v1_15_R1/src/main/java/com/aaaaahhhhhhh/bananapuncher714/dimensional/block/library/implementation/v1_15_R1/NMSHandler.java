@@ -1,5 +1,8 @@
 package com.aaaaahhhhhhh.bananapuncher714.dimensional.block.library.implementation.v1_15_R1;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -86,11 +89,12 @@ public class NMSHandler implements com.aaaaahhhhhhh.bananapuncher714.dimensional
 	}
 	
 	private boolean register( BananaBlock nmsBlock, DBlock block ) {
+	    DInfo info = block.getInfo();
+	    
 	    // Register it with the block registry
-        IRegistry.a( IRegistry.BLOCK, block.getKey().toString(), nmsBlock );
+        IRegistry.a( IRegistry.BLOCK, info.getKey().toString(), nmsBlock );
 
         // Add it to the NMS -> Material dictionary
-        DInfo info = block.getBlockInfo();
         CraftBlockData data = ( CraftBlockData ) info.getBlockData();
         BLOCK_MATERIAL.put( nmsBlock, data.getMaterial() );
         
@@ -129,7 +133,12 @@ public class NMSHandler implements com.aaaaahhhhhhh.bananapuncher714.dimensional
 	
 	@Override
 	public DBlockData getBlockDataAt( Location location ) {
-	    IBlockData data = ( ( CraftBlock ) location.getBlock() ).getNMS();
+	    return getBlockDataFrom( location.getBlock() );
+	}
+	
+	@Override
+	public DBlockData getBlockDataFrom( org.bukkit.block.Block bBlock ) {
+	    IBlockData data = ( ( CraftBlock ) bBlock ).getNMS();
 	    Block block = data.getBlock();
 	    if ( block instanceof BananaBlock ) {
 	        return new BananaBlockData( data );
@@ -142,7 +151,7 @@ public class NMSHandler implements com.aaaaahhhhhhh.bananapuncher714.dimensional
 	    World world = ( ( CraftWorld ) location.getWorld() ).getHandle();
 	    
 	    BlockPosition position = new BlockPosition( location.getBlockX(), location.getBlockY(), location.getBlockZ() );
-	    Block nmsBlock = IRegistry.BLOCK.get( new MinecraftKey( block.getKey().toString() ) );
+	    Block nmsBlock = IRegistry.BLOCK.get( new MinecraftKey( block.getInfo().getKey().toString() ) );
 	    world.setTypeUpdate( position, nmsBlock.getBlockData() );
 	    return getBlockDataAt( location );
 	}
@@ -175,5 +184,24 @@ public class NMSHandler implements com.aaaaahhhhhhh.bananapuncher714.dimensional
 	        return ( ( BananaTileEntity ) ent ).getTileEntity();
 	    }
 	    return null;
+	}
+	
+	@Override
+	public void createDumpDataFile( File dump ) {
+	    try {
+	        dump.mkdirs();
+	        dump.delete();
+	        dump.createNewFile();
+	        FileWriter writer = new FileWriter( dump );
+	        for ( IBlockData data : net.minecraft.server.v1_15_R1.Block.REGISTRY_ID ) {
+	            writer.write( net.minecraft.server.v1_15_R1.Block.REGISTRY_ID.getId( data ) + "" );
+	            writer.write( "\t:\t" );
+	            writer.write( data.toString() );
+	            writer.write( '\n' );
+	        }
+	        writer.close();
+	    } catch ( IOException e ) {
+	        e.printStackTrace();
+	    }
 	}
 }

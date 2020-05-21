@@ -2,19 +2,28 @@ package com.aaaaahhhhhhh.bananapuncher714.dimensional.block.library.api;
 
 import java.awt.Color;
 
+import org.bukkit.NamespacedKey;
 import org.bukkit.block.data.BlockData;
 
 public class DInfo {
-	private BlockData material;
+	private final BlockData material;
+	private final NamespacedKey key;
 	private boolean burnable = false;
+	private boolean destroyableByFluid = false;
+	private boolean causesSuffocation = true;
 	private Color mapColor;
 	private PistonReaction pistonReaction = PistonReaction.NORMAL;
 	private float explosionStrength;
 	
-	public DInfo( BlockData material ) {
+	public DInfo( NamespacedKey key, BlockData material ) {
+		this.key = key;
 		this.material = material;
 		explosionStrength = material.getMaterial().getBlastResistance();
 		mapColor = new Color( 0xFF00FF );
+	}
+	
+	public final NamespacedKey getKey() {
+		return key;
 	}
 	
 	public final BlockData getBlockData() {
@@ -52,8 +61,26 @@ public class DInfo {
 		return explosionStrength;
 	}
 	
-	public final DInfo setExplosionStrength( float explosionStrength ) {
+	public final DInfo setExplosionResistance( float explosionStrength ) {
 		this.explosionStrength = explosionStrength;
+		return this;
+	}
+
+	public boolean isDestroyableByFluid() {
+		return destroyableByFluid;
+	}
+
+	public final DInfo setDestroyableByFluid( boolean destroyableByFluid ) {
+		this.destroyableByFluid = destroyableByFluid;
+		return this;
+	}
+
+	public boolean isCausesSuffocation() {
+		return causesSuffocation;
+	}
+
+	public final DInfo setCausesSuffocation( boolean causesSuffocation ) {
+		this.causesSuffocation = causesSuffocation;
 		return this;
 	}
 }
