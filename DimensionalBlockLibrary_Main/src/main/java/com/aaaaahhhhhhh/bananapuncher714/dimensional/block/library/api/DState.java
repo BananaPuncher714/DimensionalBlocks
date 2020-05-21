@@ -20,7 +20,6 @@ public abstract class DState< T extends Comparable< T > > {
 		return clazz;
 	}
 	
-	
 	@Override
 	public final boolean equals( Object obj ) {
 		if ( this == obj ) {

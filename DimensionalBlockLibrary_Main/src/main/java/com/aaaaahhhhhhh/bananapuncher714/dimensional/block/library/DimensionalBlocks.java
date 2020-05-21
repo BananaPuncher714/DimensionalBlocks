@@ -10,7 +10,6 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import com.aaaaahhhhhhh.bananapuncher714.dimensional.block.library.MagicalPlanks.TileEntityMagicStorage;
 import com.aaaaahhhhhhh.bananapuncher714.dimensional.block.library.api.DBlock;
 import com.aaaaahhhhhhh.bananapuncher714.dimensional.block.library.api.DBlockData;
 import com.aaaaahhhhhhh.bananapuncher714.dimensional.block.library.api.DTileEntity;
@@ -23,8 +22,6 @@ public class DimensionalBlocks extends JavaPlugin {
 	@Override
 	public void onEnable() {
 		handler = ReflectionUtil.getNewNMSHandlerInstance();
-		
-		register( new MagicalPlanks(), TileEntityMagicStorage::new, "magic_storage" );
 	}
 	
 	@Override
