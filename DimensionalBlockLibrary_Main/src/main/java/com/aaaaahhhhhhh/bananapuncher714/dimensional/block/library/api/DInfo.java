@@ -48,7 +48,7 @@ public class DInfo {
 		return this;
 	}
 	
-	public final float getExplosionStrength() {
+	public final float getExplosionResistance() {
 		return explosionStrength;
 	}
 	

@@ -29,12 +29,15 @@ import net.minecraft.server.v1_15_R1.EnumDirection;
 import net.minecraft.server.v1_15_R1.EnumHand;
 import net.minecraft.server.v1_15_R1.EnumInteractionResult;
 import net.minecraft.server.v1_15_R1.EnumPistonReaction;
+import net.minecraft.server.v1_15_R1.FluidType;
 import net.minecraft.server.v1_15_R1.GeneratorAccess;
 import net.minecraft.server.v1_15_R1.IBlockAccess;
 import net.minecraft.server.v1_15_R1.IBlockData;
+import net.minecraft.server.v1_15_R1.IRegistry;
 import net.minecraft.server.v1_15_R1.ItemStack;
 import net.minecraft.server.v1_15_R1.Material;
 import net.minecraft.server.v1_15_R1.MaterialMapColor;
+import net.minecraft.server.v1_15_R1.MinecraftKey;
 import net.minecraft.server.v1_15_R1.MovingObjectPositionBlock;
 import net.minecraft.server.v1_15_R1.VoxelShape;
 import net.minecraft.server.v1_15_R1.VoxelShapeCollision;
@@ -77,6 +80,25 @@ public class BananaBlock extends Block {
 	}
 	
 	// Expose these methods to the user
+	
+	@Override
+	public MaterialMapColor e( IBlockData iblockdata, IBlockAccess access, BlockPosition position ) {
+	    BananaBlockData data = new BananaBlockData( iblockdata );
+	    Color color = block.getMapColor( data );
+	    return computeNearest( color.getRed(), color.getGreen(), color.getBlue() );
+	}
+	
+	@Override
+	public float getDurability() {
+	    return block.getExplosionResistance();
+	}
+	
+	@Override
+	public boolean a( IBlockData iblockdata, FluidType fluidtype ) {
+	    BananaBlockData data = new BananaBlockData( iblockdata );
+	    MinecraftKey id = IRegistry.FLUID.getKey( fluidtype );
+	    return block.destroyedByFluid( data, id.getKey() );
+	}
 	
 	@Override
 	public void stepOn( World world, BlockPosition position, Entity entity ) {
@@ -151,7 +173,23 @@ public class BananaBlock extends Block {
 	    return data.getData();
 	}
 	
-	// The rest of the methods here are for interal use
+	// The rest of the methods here are for internal use
+	
+	@Override
+	public boolean c( IBlockData iblockdata, IBlockAccess iblockaccess, BlockPosition blockposition ) {
+	    // Suffocation damage detection
+	    BananaBlockData data = new BananaBlockData( iblockdata );
+	    if ( !block.causesSuffocation( data ) ) {
+	        return false;
+	    }
+	    
+	    IBlockData subData = NMSHandler.getFor( iblockdata );
+	    if ( subData == null ) {
+	        return super.c( iblockdata, iblockaccess, blockposition );
+	    }
+
+	    return subData.getBlock().c( subData, iblockaccess, blockposition );
+	}
 	
 	@Override
 	public VoxelShape a( IBlockData iblockdata, IBlockAccess iblockaccess, BlockPosition blockposition, VoxelShapeCollision voxelshapecollision ) {
@@ -234,7 +272,7 @@ public class BananaBlock extends Block {
 		Info blockInfo = Info.a( cData.getState().getBlock() );
 		try {
 		    BLOCK_INFO_MATERIAL.set( blockInfo, material.i() );
-		    BLOCK_INFO_STRENGTH.set( blockInfo, info.getExplosionStrength() );
+		    BLOCK_INFO_STRENGTH.set( blockInfo, info.getExplosionResistance() );
 		} catch ( IllegalArgumentException | IllegalAccessException e ) {
             e.printStackTrace();
         }

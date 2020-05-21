@@ -1,5 +1,6 @@
 package com.aaaaahhhhhhh.bananapuncher714.dimensional.block.library.api;
 
+import java.awt.Color;
 import java.util.Random;
 
 import org.bukkit.Location;
@@ -28,12 +29,32 @@ public abstract class DBlock {
 	
 	public void onRegister() {}
 	public void stepOn( Location location, Entity entity ) {}
-	public InteractionResult interact( DBlockData data, Location location, HumanEntity entity, boolean mainhand, CollisionResultBlock ray ) { return InteractionResult.PASS; }
 	public void onProjectileHit( DBlockData data, Entity projectile, CollisionResultBlock ray ) {}
 	public void onPlace( DBlockData data, Location location ) {}
 	public void postBreak( DBlockData data, Location location ) {}
 	public void tick( DBlockData data, Location location, Random random ) {}
 	public void updateState( DBlockData data, Location blockloc, Location neighbor, BlockFace direction ) {}
+	
+	public InteractionResult interact( DBlockData data, Location location, HumanEntity entity, boolean mainhand, CollisionResultBlock ray ) {
+		return InteractionResult.PASS;
+	}
+	
+	public boolean destroyedByFluid( DBlockData data, String fluid ) {
+		return false;
+	}
+	
+	public boolean causesSuffocation( DBlockData data ) {
+		return true;
+	}
+	
+	public float getExplosionResistance() {
+		return getBlockInfo().getExplosionResistance();
+	}
+	
+	public Color getMapColor( DBlockData data ) {
+		return getBlockInfo().getMapColor();
+	}
+	
 	public abstract DInfo getBlockInfo();
 	public abstract DState< ? >[] getStates();
 	
