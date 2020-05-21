@@ -4,10 +4,14 @@ import java.awt.Color;
 import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.bukkit.Location;
+import org.bukkit.block.BlockFace;
+import org.bukkit.craftbukkit.v1_15_R1.CraftWorld;
 import org.bukkit.craftbukkit.v1_15_R1.block.data.CraftBlockData;
+import org.bukkit.craftbukkit.v1_15_R1.entity.CraftEntity;
 import org.bukkit.entity.HumanEntity;
 
 import com.aaaaahhhhhhh.bananapuncher714.dimensional.block.library.api.DBlock;
@@ -20,17 +24,22 @@ import net.minecraft.server.v1_15_R1.BlockPosition;
 import net.minecraft.server.v1_15_R1.BlockStateList;
 import net.minecraft.server.v1_15_R1.Entity;
 import net.minecraft.server.v1_15_R1.EntityHuman;
+import net.minecraft.server.v1_15_R1.EntityLiving;
+import net.minecraft.server.v1_15_R1.EnumDirection;
 import net.minecraft.server.v1_15_R1.EnumHand;
 import net.minecraft.server.v1_15_R1.EnumInteractionResult;
 import net.minecraft.server.v1_15_R1.EnumPistonReaction;
+import net.minecraft.server.v1_15_R1.GeneratorAccess;
 import net.minecraft.server.v1_15_R1.IBlockAccess;
 import net.minecraft.server.v1_15_R1.IBlockData;
+import net.minecraft.server.v1_15_R1.ItemStack;
 import net.minecraft.server.v1_15_R1.Material;
 import net.minecraft.server.v1_15_R1.MaterialMapColor;
 import net.minecraft.server.v1_15_R1.MovingObjectPositionBlock;
 import net.minecraft.server.v1_15_R1.VoxelShape;
 import net.minecraft.server.v1_15_R1.VoxelShapeCollision;
 import net.minecraft.server.v1_15_R1.World;
+import net.minecraft.server.v1_15_R1.WorldServer;
 
 public class BananaBlock extends Block {
 	private static Field MATERIAL_ENUM_PISTON_REACTION;
@@ -89,9 +98,59 @@ public class BananaBlock extends Block {
 	// On projectile hit
 	@Override
 	public void a( World world, IBlockData iblockdata, MovingObjectPositionBlock movingobjectpositionblock, Entity entity ) {
+	    CollisionResultBlock collision = NMSHandler.getResultFrom( world, movingobjectpositionblock );
+	    CraftEntity ent = entity.getBukkitEntity();
+	    BananaBlockData data = new BananaBlockData( iblockdata );
 	    
+	    block.onProjectileHit( data, ent, collision );
+	}
+	
+	@Override
+	public void onPlace( IBlockData iblockdata, World world, BlockPosition position, IBlockData iblockdata1, boolean flag ) {
+	    super.onPlace( iblockdata, world, position, iblockdata1, flag );
+	    
+	    Location location = new Location( world.getWorld(), position.getX(), position.getY(), position.getZ() );
+	    BananaBlockData newData = new BananaBlockData( iblockdata );
+	    
+	    block.onPlace( newData, location );
+	}
+	
+	@Override
+	public void postPlace( World world, BlockPosition blockposition, IBlockData iblockdata, EntityLiving entityliving, ItemStack itemstack ) {
+	    super.postPlace( world, blockposition, iblockdata, entityliving, itemstack );
+	    // This isn't actually called since it's not placeable by an item
+	}
+	
+	@Override
+	public void postBreak( GeneratorAccess generatoraccess, BlockPosition blockposition, IBlockData iblockdata ) {
+	    CraftWorld world = generatoraccess.getMinecraftWorld().getWorld();
+	    Location location = new Location( world, blockposition.getX(), blockposition.getY(), blockposition.getZ() );
+	    BananaBlockData data = new BananaBlockData( iblockdata );
+
+	    block.postBreak( data, location );
+	}
+	
+	@Override
+	public void tick( IBlockData iblockdata, WorldServer worldserver, BlockPosition blockposition, Random random ) {
+	    Location location = new Location( worldserver.getWorld(), blockposition.getX(), blockposition.getY(), blockposition.getZ() );
+	    BananaBlockData data = new BananaBlockData( iblockdata );
+	    block.tick( data, location, random );
 	}
 
+	@Override
+	public IBlockData updateState( IBlockData iblockdata, EnumDirection enumdirection, IBlockData iblockdata1, GeneratorAccess generatoraccess, BlockPosition blockposition, BlockPosition blockposition1 ) {
+	    Location blockLoc = new Location( generatoraccess.getMinecraftWorld().getWorld(), blockposition.getX(), blockposition.getY(), blockposition.getZ() );
+	    Location neighbor = new Location( generatoraccess.getMinecraftWorld().getWorld(), blockposition1.getX(), blockposition1.getY(), blockposition1.getZ() );
+	    
+	    BlockFace face = BlockFace.valueOf( enumdirection.name() );
+	    
+	    BananaBlockData data = new BananaBlockData( iblockdata );
+	    
+	    block.updateState( data, blockLoc, neighbor, face );
+	    
+	    return data.getData();
+	}
+	
 	// The rest of the methods here are for interal use
 	
 	@Override
