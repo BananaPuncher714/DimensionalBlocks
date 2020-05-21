@@ -53,7 +53,11 @@ public class NMSHandler implements com.aaaaahhhhhhh.bananapuncher714.dimensional
     public boolean register( DBlock block, DTileEntity tileEntity ) {
         // Add a new tile entity
         Supplier< BananaTileEntity > supplier = () -> { return new BananaTileEntity( IRegistry.BLOCK_ENTITY_TYPE.get( new MinecraftKey( tileEntity.getId() ) ), tileEntity ); };
+        // Set the DBlock for this thread while we call the constructor
+        long threadId = Thread.currentThread().getId();
+        BananaBlock.GLOBAL_BLOCK_MAP.put( threadId, block );
         BananaBlock nmsBlock = new BananaBlockTileEntity( block, supplier );
+        BananaBlock.GLOBAL_BLOCK_MAP.remove( threadId );
 
         Set< Block > blocks = tileEntityBlocks.getOrDefault( tileEntity, new HashSet< Block >() );
         tileEntityBlocks.put( tileEntity, blocks );
@@ -68,7 +72,11 @@ public class NMSHandler implements com.aaaaahhhhhhh.bananapuncher714.dimensional
 
 	@Override
 	public boolean register( DBlock block ) {
-	    return register( new BananaBlock( block ), block );
+        long threadId = Thread.currentThread().getId();
+        BananaBlock.GLOBAL_BLOCK_MAP.put( threadId, block );
+        BananaBlock nmsBlock = new BananaBlock( block );
+        BananaBlock.GLOBAL_BLOCK_MAP.remove( threadId );
+	    return register( nmsBlock, block );
 	}
 	
 	private boolean register( BananaBlock nmsBlock, DBlock block ) {
@@ -111,5 +119,14 @@ public class NMSHandler implements com.aaaaahhhhhhh.bananapuncher714.dimensional
 	    Block nmsBlock = IRegistry.BLOCK.get( new MinecraftKey( block.getKey().toString() ) );
 	    world.setTypeUpdate( position, nmsBlock.getBlockData() );
 	    return getBlockDataAt( location );
+	}
+	
+	@Override
+	public void setDBlockDataAt( DBlockData data, Location location ) {
+	    World world = ( ( CraftWorld ) location.getWorld() ).getHandle();
+	    BlockPosition position = new BlockPosition( location.getBlockX(), location.getBlockY(), location.getBlockZ() );
+	    if ( data instanceof BananaBlockData ) {
+	        world.setTypeUpdate( position, ( ( BananaBlockData ) data ).getData() );
+	    }
 	}
 }

@@ -34,4 +34,8 @@ public class DimensionalBlocks extends JavaPlugin {
 	public static DBlockData setDBlockAt( DBlock block, Location location ) {
 		return handler.setDBlockAt( block, location);
 	}
+	
+	public static void setDBlockDataAt( DBlockData data, Location location ) {
+		handler.setDBlockDataAt( data, location );
+	}
 }

@@ -25,11 +25,15 @@ public class BananaBlockData implements DBlockData {
 
     @Override
     public < T extends Comparable< T > > void set( DState< T > state, T value ) {
-        block.set( state, value, data );
+        data = block.set( state, value, data );
     }
 
     @Override
     public DBlock getBlock() {
         return block.getBlock();
+    }
+    
+    protected IBlockData getData() {
+        return data;
     }
 }

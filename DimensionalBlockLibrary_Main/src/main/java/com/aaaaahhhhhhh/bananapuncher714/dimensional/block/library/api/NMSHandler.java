@@ -8,4 +8,5 @@ public interface NMSHandler {
 	
 	DBlockData getBlockDataAt( Location location );
 	DBlockData setDBlockAt( DBlock block, Location location );
+	void setDBlockDataAt( DBlockData data, Location location );
 }

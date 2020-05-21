@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.bukkit.Location;
 import org.bukkit.craftbukkit.v1_15_R1.block.data.CraftBlockData;
@@ -14,6 +15,7 @@ import com.aaaaahhhhhhh.bananapuncher714.dimensional.block.library.api.DState;
 
 import net.minecraft.server.v1_15_R1.Block;
 import net.minecraft.server.v1_15_R1.BlockPosition;
+import net.minecraft.server.v1_15_R1.BlockStateList;
 import net.minecraft.server.v1_15_R1.Entity;
 import net.minecraft.server.v1_15_R1.EnumPistonReaction;
 import net.minecraft.server.v1_15_R1.IBlockData;
@@ -25,6 +27,8 @@ public class BananaBlock extends Block {
 	private static Field MATERIAL_ENUM_PISTON_REACTION;
 	private static Field BLOCK_INFO_MATERIAL;
 	private static Field BLOCK_INFO_STRENGTH;
+	
+	protected static Map< Long, DBlock > GLOBAL_BLOCK_MAP = new ConcurrentHashMap< Long, DBlock >();
 	
 	static {
 		try {
@@ -43,17 +47,15 @@ public class BananaBlock extends Block {
 	
 	private DBlock block;
 
-	private Map< String, BananaState< ? > > states = new HashMap< String, BananaState< ? > >();
+	private Map< String, BananaState< ? > > states;
 	
 	public BananaBlock( DBlock block ) {
+	    // Construct the info from the block
 		super( getInfoFrom( block ) );
 		
-		// Dumb generics and their type erasure
-		for ( DState< ? > state : block.getStates() ) {
-		    BananaState< ? > bState = new BananaState( state );
-		}
-		
 		this.block = block;
+		
+		initializeStates( block );
 	}
 	
 	@Override
@@ -62,6 +64,12 @@ public class BananaBlock extends Block {
 	    block.stepOn( location, entity.getBukkitEntity() );
 	}
 	
+    @Override
+    protected void a( BlockStateList.a< Block, IBlockData > blockstatelist ) {
+        initializeStates( block == null ? GLOBAL_BLOCK_MAP.get( Thread.currentThread().getId() ) : block );
+        blockstatelist.a( states.values().toArray( new BananaState[ states.size() ] ) );
+    }
+    
 	public DBlock getBlock() {
 	    return block;
 	}
@@ -80,7 +88,7 @@ public class BananaBlock extends Block {
 	    }
 	}
 	
-	public < T extends Comparable< T > > void set( DState< T > state, T value, IBlockData data ) {
+	public < T extends Comparable< T > > IBlockData set( DState< T > state, T value, IBlockData data ) {
 	    String id = state.getId();
         BananaState bState = states.get( id );
         if ( bState == null ) {
@@ -88,9 +96,20 @@ public class BananaBlock extends Block {
         }
 	    DState dState = bState.getState();
 	    if ( dState.equals( state ) ) {
-	        data.set( bState, value );
+	        return data.set( bState, value );
 	    } else {
 	        throw new IllegalArgumentException( "Requested Invalid State" );
+	    }
+	}
+	
+	private void initializeStates( DBlock block ) {
+	    // Dumb generics and their type erasure
+	    if ( states == null ) {
+	        states = new HashMap< String, BananaState< ? > >();
+	        for ( DState< ? > state : block.getStates() ) {
+	            BananaState< ? > bState = new BananaState( state );
+	            states.put( state.getId(), bState );
+	        }
 	    }
 	}
 	
