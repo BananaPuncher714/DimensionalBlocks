@@ -12,6 +12,12 @@ public class CollisionResultBlock extends CollisionResult {
 		this.block = block;
 	}
 
+	/**
+	 * Get the block that was involved in the collision.
+	 * 
+	 * @return
+	 * A solid block that was hit, if not a miss.
+	 */
 	public Block getBlock() {
 		return block;
 	}

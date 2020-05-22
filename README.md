@@ -233,7 +233,7 @@ public class CustomBlock extends DBlock {
     public void onProjectileHit( DBlockData data, Entity projectile, CollisionResultBlock ray ) {
         Location blockLocation = ray.getBlock().getLocation();
         DTileEntity tileEntity = DimensionalBlocks.getDTileEntityAt( blockLocation );
-        if ( tileEntity instanceof TileEntityIntegerCounter && projectile instanceof Snowball ) {
+        if ( tileEntity instanceof TileEntityIntegerCounter && projectile instanceof Arrow ) {
             TileEntityIntegerCounter counter = ( TileEntityIntegerCounter ) tileEntity;
             counter.increment();
         }

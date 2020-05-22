@@ -19,6 +19,12 @@ public final class ReflectionUtil {
 	private ReflectionUtil() {
 	}
 	
+	/**
+	 * Internal use only
+	 * 
+	 * @return
+	 * Fetch a version specific NMS handler
+	 */
 	public static NMSHandler getNewNMSHandlerInstance() {
 		try {
 			Class< ? > clazz = Class.forName( "com.aaaaahhhhhhh.bananapuncher714.dimensional.block.library.implementation." + VERSION + ".NMSHandler" );

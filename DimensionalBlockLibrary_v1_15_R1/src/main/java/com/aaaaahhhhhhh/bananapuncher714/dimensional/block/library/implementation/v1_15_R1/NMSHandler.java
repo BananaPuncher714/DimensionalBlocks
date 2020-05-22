@@ -148,7 +148,7 @@ public class NMSHandler implements com.aaaaahhhhhhh.bananapuncher714.dimensional
 	
 	@Override
 	public DBlockData setDBlockAt( DBlock block, Location location ) {
-	    return setDBlockAt( block, location, false );
+	    return setDBlockAt( block, location, true );
 	}
 
 	@Override
@@ -163,7 +163,7 @@ public class NMSHandler implements com.aaaaahhhhhhh.bananapuncher714.dimensional
 
 	@Override
 	public void setDBlockDataAt( DBlockData data, Location location ) {
-	    setDBlockDataAt( data, location, false );
+	    setDBlockDataAt( data, location, true );
 	}
 
 	@Override

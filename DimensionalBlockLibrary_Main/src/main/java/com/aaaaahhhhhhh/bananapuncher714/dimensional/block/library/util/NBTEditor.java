@@ -371,11 +371,11 @@ public final class NBTEditor {
 	 * 
 	 * @param item
 	 * The itemstack to get the keys from
-	 * @param key
-	 * The keys to fetch; an integer after a key value indicates that it should get the nth place of
-	 * the previous compound because it is a list;
 	 * @return
 	 * The item represented by the keys, and an integer if it is showing how long a list is.
+	 * @param keys
+	 * The keys to fetch; an integer after a key value indicates that it should get the nth place of
+	 * the previous compound because it is a list;
 	 */
 	public static Object getItemTag( ItemStack item, Object... keys ) {
 		if ( item == null ) {
@@ -433,14 +433,14 @@ public final class NBTEditor {
 	 * @deprecated
 	 * 
 	 * Sets an NBT tag in an item with the provided keys and value
-	 * Should use the {@link set(Object, Object, Object...)} method instead
+	 * Should use the {@link #set(Object, Object, Object...)} method instead
 	 * 
 	 * @param item
 	 * The itemstack to set
-	 * @param key
-	 * The keys to set, String for NBTCompound, int or null for an NBTTagList
 	 * @param value
 	 * The value to set
+	 * @param keys
+	 * The keys to set, String for NBTCompound, int or null for an NBTTagList
 	 * @return
 	 * A new ItemStack with the updated NBT tags
 	 */
@@ -509,9 +509,9 @@ public final class NBTEditor {
 	 * 
 	 * Gets an NBT tag in a given entity with the specified keys
 	 * 
-	 * @param block
+	 * @param entity
 	 * The entity to get the keys from
-	 * @param key
+	 * @param keys
 	 * The keys to fetch; an integer after a key value indicates that it should get the nth place of
 	 * the previous compound because it is a list;
 	 * @return
@@ -567,16 +567,14 @@ public final class NBTEditor {
 	 * @deprecated
 	 * 
 	 * Sets an NBT tag in an entity with the provided keys and value
-	 * Should use the {@link set(Object, Object, Object...)} method instead
+	 * Should use the {@link #set(Object, Object, Object...)} method instead
 	 * 
-	 * @param item
+	 * @param entity
 	 * The entity to set
-	 * @param key
-	 * The keys to set, String for NBTCompound, int or null for an NBTTagList
 	 * @param value
 	 * The value to set
-	 * @return
-	 * A new ItemStack with the updated NBT tags
+	 * @param keys
+	 * The keys to set, String for NBTCompound, int or null for an NBTTagList
 	 */
 	public static void setEntityTag( Entity entity, Object value, Object... keys ) {
 		if ( entity == null ) {
@@ -609,7 +607,7 @@ public final class NBTEditor {
 	 * 
 	 * @param block
 	 * The block to get the keys from
-	 * @param key
+	 * @param keys
 	 * The keys to fetch; an integer after a key value indicates that it should get the nth place of
 	 * the previous compound because it is a list;
 	 * @return
@@ -677,16 +675,14 @@ public final class NBTEditor {
 	 * @deprecated
 	 * 
 	 * Sets an NBT tag in an block with the provided keys and value
-	 * Should use the {@link set(Object, Object, Object...)} method instead
+	 * Should use the {@link #set(Object, Object, Object...)} method instead
 	 * 
-	 * @param item
+	 * @param block
 	 * The block to set
-	 * @param key
-	 * The keys to set, String for NBTCompound, int or null for an NBTTagList
 	 * @param value
 	 * The value to set
-	 * @return
-	 * A new ItemStack with the updated NBT tags
+	 * @param keys
+	 * The keys to set, String for NBTCompound, int or null for an NBTTagList
 	 */
 	public static void setBlockTag( Block block, Object value, Object... keys ) {
 		try {
@@ -917,6 +913,8 @@ public final class NBTEditor {
 	/**
 	 * Sets the value in the object with the given keys
 	 * 
+	 * @param <T>
+	 * An ItemStack, Entity, Block, or NBTCompound
 	 * @param object
 	 * Must be an ItemStack, Entity, or Block
 	 * @param value
@@ -948,7 +946,7 @@ public final class NBTEditor {
 	/**
 	 * Load an NBTCompound from a String.
 	 * 
-	 * @param object
+	 * @param json
 	 * A String in json format.
 	 * @return
 	 * An NBTCompound from the String provided. May or may not be a valid ItemStack.

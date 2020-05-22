@@ -34,7 +34,31 @@ public abstract class DState< T extends Comparable< T > > {
 		return false;
 	}
 
+	/**
+	 * Convert the provided object to string.
+	 * 
+	 * @param value
+	 * The value that needs converting.
+	 * @return
+	 * A string which may be used in serialization.
+	 */
 	public abstract String convertToString( T value );
+	
+	/**
+	 * Get an optional from the provided string.
+	 * 
+	 * @param value
+	 * A string representing a value of the object.
+	 * @return
+	 * An optional that may contain a valid object.
+	 */
     public abstract Optional< T > getFrom( String value );
+    
+    /**
+     * Get all the valid values that this state could take on.
+     * 
+     * @return
+     * A collection of all valid states.
+     */
     public abstract Collection< T > getValues();
 }
