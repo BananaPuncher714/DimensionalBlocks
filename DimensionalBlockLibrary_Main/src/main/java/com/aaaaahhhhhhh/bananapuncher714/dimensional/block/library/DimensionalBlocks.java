@@ -84,6 +84,10 @@ public class DimensionalBlocks extends JavaPlugin {
 		handler.tick( location, block );
 	}
 	
+	public static void applyPhysics( DBlock block, Location location ) {
+		handler.applyPhysics( block, location );
+	}
+	
 	public static void createBlockStateDumpFile( File dump ) {
 		handler.createDumpDataFile( dump );
 	}

@@ -21,6 +21,7 @@ public interface NMSHandler {
 	
 	void tick( Location location, DBlock block );
 	void tick( Location location, DBlock block, int delay );
+	void applyPhysics( DBlock block, Location location );
 	
 	void createDumpDataFile( File dump );
 }

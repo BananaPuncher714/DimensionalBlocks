@@ -206,6 +206,7 @@ public class NMSHandler implements com.aaaaahhhhhhh.bananapuncher714.dimensional
         }
 	}
 	
+	@Override
 	public void tick( Location location, DBlock block, int delay ) {
 	    World world = ( ( CraftWorld ) location.getWorld() ).getHandle();
 	    BlockPosition position = new BlockPosition( location.getBlockX(), location.getBlockY(), location.getBlockZ() );
@@ -213,6 +214,14 @@ public class NMSHandler implements com.aaaaahhhhhhh.bananapuncher714.dimensional
 	    if ( !world.getBlockTickList().b( position, nmsBlock ) ) {
 	        world.getBlockTickList().a( position, nmsBlock, delay );
 	    }
+	}
+	
+	@Override
+	public void applyPhysics( DBlock block, Location location ) {
+	    World world = ( ( CraftWorld ) location.getWorld() ).getHandle();
+	    BlockPosition position = new BlockPosition( location.getBlockX(), location.getBlockY(), location.getBlockZ() );
+	    Block nmsBlock = IRegistry.BLOCK.get( new MinecraftKey( block.getInfo().getKey().toString() ) );
+	    world.applyPhysics( position, nmsBlock );
 	}
 	
 	@Override

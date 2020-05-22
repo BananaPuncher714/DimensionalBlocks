@@ -44,6 +44,10 @@ public abstract class DBlock {
 		DimensionalBlocks.tickLocation( location, this, delay );
 	}
 	
+	public final void applyPhysics( Location location ) {
+		DimensionalBlocks.applyPhysics( this, location );
+	}
+	
 	public void onRegister() {}
 	public void stepOn( Location location, Entity entity ) {}
 	public void onProjectileHit( DBlockData data, Entity projectile, CollisionResultBlock ray ) {}
@@ -103,7 +107,7 @@ public abstract class DBlock {
 	public static void update( DBlockData block, Location location, boolean doPhysics ) {
 		DimensionalBlocks.setDBlockDataAt( block, location, doPhysics );
 	}
-	
+
 	public static DTileEntity getTileEntity( Location location ) {
 		return DimensionalBlocks.getDTileEntityAt( location );
 	}
