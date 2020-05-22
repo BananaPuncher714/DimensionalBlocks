@@ -16,13 +16,6 @@ public interface DBlockData {
 	void setAsDefault();
 	
 	/**
-	 * Set the client view of this block to the BlockData provided.
-	 * 
-	 * @param craftData
-	 */
-	void setClientBlock( BlockData craftData );
-	
-	/**
 	 * Get the value of one of the states of this data. The {@link DState} must be included in the {@link DBlock#getStates()} method.
 	 * 
 	 * @param <T>

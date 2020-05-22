@@ -13,6 +13,7 @@ import java.util.function.Supplier;
 
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.craftbukkit.v1_15_R1.CraftWorld;
@@ -57,6 +58,7 @@ public class NMSHandler implements com.aaaaahhhhhhh.bananapuncher714.dimensional
     }
     
     private Map< String, Set< Block > > tileEntityBlocks = new HashMap< String, Set< Block > >();
+    private Map< NamespacedKey, BananaBlock > blockMap = new HashMap< NamespacedKey, BananaBlock >();
     
     @Override
     public boolean register( DBlock block, Supplier< DTileEntity > tileEntity, String id ) {
@@ -89,6 +91,7 @@ public class NMSHandler implements com.aaaaahhhhhhh.bananapuncher714.dimensional
 	}
 	
 	private boolean register( BananaBlock nmsBlock, DBlock block ) {
+	    blockMap.put( block.getKey(), nmsBlock );
 	    DInfo info = block.getInfo();
 	    
 	    // Register it with the block registry
@@ -98,25 +101,14 @@ public class NMSHandler implements com.aaaaahhhhhhh.bananapuncher714.dimensional
         CraftBlockData data = ( CraftBlockData ) info.getBlockData();
         BLOCK_MATERIAL.put( nmsBlock, data.getMaterial() );
         
-        // Register all the different states possible
-        int id = Block.REGISTRY_ID.getId( data.getState() );
-        for ( IBlockData state : nmsBlock.getStates().a() ) {
-            state.c();
-            
-            Block.REGISTRY_ID.b( state );
-            
-            BLOCK_ID_MAP.put( state, id );
-        }
-
         // Let the block do whatever steps it needs
         block.onRegister();
-        
+
         return true;
 	}
 	
-	protected static void setRegistryBlockId( IBlockData data, BlockData craftData ) {
-	    IBlockData state = ( ( CraftBlockData ) craftData ).getState();
-	    BLOCK_ID_MAP.put( data, BLOCK_ID_MAP.get( state ) );
+	protected static void setRegistryBlockId( IBlockData data, IBlockData clientData ) {
+	    BLOCK_ID_MAP.put( data, BLOCK_ID_MAP.get( clientData ) );
 	}
 	
 	protected static IBlockData getFor( IBlockData data ) {
@@ -177,7 +169,7 @@ public class NMSHandler implements com.aaaaahhhhhhh.bananapuncher714.dimensional
 	
 	@Override
 	public DBlockData getDefaultBlockDataFor( DBlock block ) {
-	    Block nmsBlock = IRegistry.BLOCK.get( new MinecraftKey( block.getKey().toString() ) );
+	    BananaBlock nmsBlock = blockMap.get( block.getKey() );
 	    if ( nmsBlock == null ) {
 	        throw new IllegalArgumentException( block.getKey().toString() + " has not been registered!" );
 	    }

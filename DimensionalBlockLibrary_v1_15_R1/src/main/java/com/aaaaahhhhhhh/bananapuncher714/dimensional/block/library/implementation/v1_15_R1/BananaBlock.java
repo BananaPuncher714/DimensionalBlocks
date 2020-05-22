@@ -24,7 +24,6 @@ import net.minecraft.server.v1_15_R1.BlockPosition;
 import net.minecraft.server.v1_15_R1.BlockStateList;
 import net.minecraft.server.v1_15_R1.Entity;
 import net.minecraft.server.v1_15_R1.EntityHuman;
-import net.minecraft.server.v1_15_R1.EntityLiving;
 import net.minecraft.server.v1_15_R1.EnumDirection;
 import net.minecraft.server.v1_15_R1.EnumHand;
 import net.minecraft.server.v1_15_R1.EnumInteractionResult;
@@ -34,7 +33,6 @@ import net.minecraft.server.v1_15_R1.GeneratorAccess;
 import net.minecraft.server.v1_15_R1.IBlockAccess;
 import net.minecraft.server.v1_15_R1.IBlockData;
 import net.minecraft.server.v1_15_R1.IRegistry;
-import net.minecraft.server.v1_15_R1.ItemStack;
 import net.minecraft.server.v1_15_R1.Material;
 import net.minecraft.server.v1_15_R1.MaterialMapColor;
 import net.minecraft.server.v1_15_R1.MinecraftKey;
@@ -69,6 +67,7 @@ public class BananaBlock extends Block {
 	private DBlock block;
 
 	private Map< String, BananaState< ? > > states;
+	private Map< IBlockData, IBlockData > clientStates;
 	
 	public BananaBlock( DBlock block ) {
 	    // Construct the info from the block
@@ -187,16 +186,12 @@ public class BananaBlock extends Block {
 	public void onPlace( IBlockData iblockdata, World world, BlockPosition position, IBlockData iblockdata1, boolean flag ) {
 	    super.onPlace( iblockdata, world, position, iblockdata1, flag );
 	    
+	    // More accurate to call this "onBlockDataChange"
+	    
 	    Location location = new Location( world.getWorld(), position.getX(), position.getY(), position.getZ() );
 	    BananaBlockData newData = new BananaBlockData( iblockdata );
 	    
-	    block.onPlace( newData, location );
-	}
-	
-	@Override
-	public void postPlace( World world, BlockPosition blockposition, IBlockData iblockdata, EntityLiving entityliving, ItemStack itemstack ) {
-	    super.postPlace( world, blockposition, iblockdata, entityliving, itemstack );
-	    // This isn't actually called since it's not placeable by an item
+	    block.onDataUpdate( newData, location );
 	}
 	
 	@Override
@@ -254,10 +249,17 @@ public class BananaBlock extends Block {
 	@Override
 	public int a( IBlockData iblockdata ) {
 	    // Light level emission
-	    IBlockData subData = NMSHandler.getFor( iblockdata );
-	    if ( subData == null ) {
-	        return super.a( iblockdata );
-	    }
+	    BananaBlockData data = new BananaBlockData( iblockdata ).lock();
+	    
+	    IBlockData subData = ( ( CraftBlockData ) block.getClientBlock( data ) ).getState();
+
+	    // Register this state
+	    // Normally, this would have been done in the NMS handler, but might as well as do it here
+	    // until I can find a reason otherwise.
+	    iblockdata.c();
+	    Block.REGISTRY_ID.b( iblockdata );
+	    NMSHandler.setRegistryBlockId( iblockdata, subData );
+	    
 	    return subData.h();
 	}	
 
@@ -275,7 +277,8 @@ public class BananaBlock extends Block {
 	
     @Override
     protected void a( BlockStateList.a< Block, IBlockData > blockstatelist ) {
-        initializeStates( block == null ? GLOBAL_BLOCK_MAP.get( Thread.currentThread().getId() ) : block );
+        block = block == null ? GLOBAL_BLOCK_MAP.get( Thread.currentThread().getId() ) : block;
+        initializeStates( block );
         blockstatelist.a( states.values().toArray( new BananaState[ states.size() ] ) );
     }
     

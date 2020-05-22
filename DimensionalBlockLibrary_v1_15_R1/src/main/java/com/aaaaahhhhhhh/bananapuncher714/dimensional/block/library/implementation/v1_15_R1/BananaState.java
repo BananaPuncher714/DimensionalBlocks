@@ -21,7 +21,7 @@ public class BananaState< T extends Comparable< T > > extends BlockState< T > {
 
     @Override
     public String a( T value ) {
-        return state.convertToString( value );
+        return state.convertToString( value ).toLowerCase();
     }
 
     @Override

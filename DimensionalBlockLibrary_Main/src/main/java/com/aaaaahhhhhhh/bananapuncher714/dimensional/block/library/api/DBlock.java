@@ -65,6 +65,18 @@ public abstract class DBlock {
 	public void onRegister() {}
 	
 	/**
+	 * Set the client view of this block to the BlockData provided.
+	 * 
+	 * @param data
+	 * This value should not be modified in any way except for determining the states. Doing so will throw an IllegalArgumentException.
+	 * @return
+	 * A non-null block data representing the state client side.
+	 */
+	public BlockData getClientBlock( DBlockData data ) {
+		return getData();
+	}
+	
+	/**
 	 * Called when an entity is standing directly on top of the block.
 	 * 
 	 * @param location
@@ -88,7 +100,7 @@ public abstract class DBlock {
 	 * @param data
 	 * @param location
 	 */
-	public void onPlace( DBlockData data, Location location ) {}
+	public void onDataUpdate( DBlockData data, Location location ) {}
 	
 	/**
 	 * Called after the block gets broken by the player, or removed somehow.
