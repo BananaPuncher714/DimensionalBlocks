@@ -56,8 +56,16 @@ public class DimensionalBlocks extends JavaPlugin {
 		return handler.setDBlockAt( block, location);
 	}
 	
+	public static DBlockData setDBlockAt( DBlock block, Location location, boolean doPhysics ) {
+		return handler.setDBlockAt( block, location, doPhysics );
+	}
+	
 	public static void setDBlockDataAt( DBlockData data, Location location ) {
 		handler.setDBlockDataAt( data, location );
+	}
+	
+	public static void setDBlockDataAt( DBlockData data, Location location, boolean doPhysics ) {
+		handler.setDBlockDataAt( data, location, doPhysics );
 	}
 	
 	public static DBlockData getDefaultBlockDataFor( DBlock block ) {
@@ -66,6 +74,14 @@ public class DimensionalBlocks extends JavaPlugin {
 	
 	public static DTileEntity getDTileEntityAt( Location location ) {
 		return handler.getDTileEntityAt( location );
+	}
+
+	public static void tickLocation( Location location, DBlock block, int delay ) {
+		handler.tick( location, block, delay );
+	}
+	
+	public static void tickLocation( Location location, DBlock block ) {
+		handler.tick( location, block );
 	}
 	
 	public static void createBlockStateDumpFile( File dump ) {

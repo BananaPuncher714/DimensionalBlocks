@@ -36,6 +36,14 @@ public abstract class DBlock {
 		return DimensionalBlocks.getDefaultBlockDataFor( this );
 	}
 	
+	public final void tickLater( Location location ) {
+		DimensionalBlocks.tickLocation( location, this );
+	}
+	
+	public final void tickLater( Location location, int delay ) {
+		DimensionalBlocks.tickLocation( location, this, delay );
+	}
+	
 	public void onRegister() {}
 	public void stepOn( Location location, Entity entity ) {}
 	public void onProjectileHit( DBlockData data, Entity projectile, CollisionResultBlock ray ) {}
@@ -43,6 +51,24 @@ public abstract class DBlock {
 	public void postBreak( DBlockData data, Location location ) {}
 	public void tick( DBlockData data, Location location, Random random ) {}
 	public void updateState( DBlockData data, Location blockloc, Location neighbor, BlockFace direction ) {}
+	public void doPhysics( DBlockData data, Location location, Location otherBlock ) {}
+	public void handleRain( Location location ) {}
+	
+	public boolean isComplexRedstone( DBlockData data ) {
+		return false;
+	}
+
+	public int getComparatorLevel( DBlockData data, Location location ) {
+		return 0;
+	}
+	
+	public boolean isPowerSource( DBlockData data ) {
+		return false;
+	}
+
+	public int getPowerSourceLevel( DBlockData data, Location location, BlockFace face ) {
+		return 0;
+	}
 	
 	public InteractionResult interact( DBlockData data, Location location, HumanEntity entity, boolean mainhand, CollisionResultBlock ray ) {
 		return InteractionResult.PASS;
@@ -52,7 +78,7 @@ public abstract class DBlock {
 		return info.isDestroyableByFluid();
 	}
 	
-	public boolean causesSuffocation( DBlockData data ) {
+	public boolean causesSuffocation( DBlockData data, Location location ) {
 		return info.isCausesSuffocation();
 	}
 	
@@ -72,6 +98,10 @@ public abstract class DBlock {
 	
 	public static void update( DBlockData block, Location location ) {
 		DimensionalBlocks.setDBlockDataAt( block, location );
+	}
+	
+	public static void update( DBlockData block, Location location, boolean doPhysics ) {
+		DimensionalBlocks.setDBlockDataAt( block, location, doPhysics );
 	}
 	
 	public static DTileEntity getTileEntity( Location location ) {

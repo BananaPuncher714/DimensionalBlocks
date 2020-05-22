@@ -82,6 +82,56 @@ public class BananaBlock extends Block {
 	// Expose these methods to the user
 	
 	@Override
+	public int a( IBlockData iblockdata, IBlockAccess iblockaccess, BlockPosition blockposition, EnumDirection enumdirection ) {
+	    // Power source
+	    if ( iblockaccess instanceof World ) {
+	        World world = ( World ) iblockaccess;
+	        BananaBlockData data = new BananaBlockData( iblockdata );
+	        Location location = new Location( world.getWorld(), blockposition.getX(), blockposition.getY(), blockposition.getZ() );
+	        BlockFace face = BlockFace.valueOf( enumdirection.name() );
+	        
+	        return block.getPowerSourceLevel( data, location, face );
+	    }
+	    return super.a( iblockdata, iblockaccess, blockposition, enumdirection );
+	}
+	
+	@Override
+	public boolean isPowerSource( IBlockData iblockdata ) {
+        BananaBlockData data = new BananaBlockData( iblockdata );
+        return block.isPowerSource( data );
+	}
+	
+	@Override
+	public int a( IBlockData iblockdata, World world, BlockPosition blockposition ) {
+	    BananaBlockData data = new BananaBlockData( iblockdata );
+        Location location = new Location( world.getWorld(), blockposition.getX(), blockposition.getY(), blockposition.getZ() );
+        
+        return block.getComparatorLevel( data, location );
+	}
+	
+	@Override
+	public boolean isComplexRedstone( IBlockData iblockdata ) {
+	    BananaBlockData data = new BananaBlockData( iblockdata );
+	    return block.isComplexRedstone( data );
+	}
+	
+    @Override
+    public void doPhysics( IBlockData iblockdata, World world, BlockPosition blockposition, Block nmsBlock, BlockPosition blockposition1, boolean flag ) {
+        BananaBlockData data = new BananaBlockData( iblockdata );
+        Location location = new Location( world.getWorld(), blockposition.getX(), blockposition.getY(), blockposition.getZ() );
+
+        Location activated = new Location( world.getWorld(), blockposition1.getX(), blockposition1.getY(), blockposition1.getZ() );
+        
+        block.doPhysics( data, location, activated );
+    }
+	
+	@Override
+	public void c( World world, BlockPosition position ) {
+	    Location location = new Location( world.getWorld(), position.getX(), position.getY(), position.getZ() );
+	    block.handleRain( location );
+	}
+	
+	@Override
 	public EnumPistonReaction getPushReaction( IBlockData iblockdata ) {
 	    BananaBlockData data = new BananaBlockData( iblockdata );
 	    return EnumPistonReaction.valueOf( block.getPistonReaction( data ).name() );
@@ -185,8 +235,12 @@ public class BananaBlock extends Block {
 	public boolean c( IBlockData iblockdata, IBlockAccess iblockaccess, BlockPosition blockposition ) {
 	    // Suffocation damage detection
 	    BananaBlockData data = new BananaBlockData( iblockdata );
-	    if ( !block.causesSuffocation( data ) ) {
-	        return false;
+	    if ( iblockaccess instanceof World ) {
+	        World world = ( World ) iblockaccess;
+	        Location location = new Location( world.getWorld(), blockposition.getX(), blockposition.getY(), blockposition.getZ() );
+	        if ( !block.causesSuffocation( data, location ) ) {
+	            return false;
+	        }
 	    }
 	    
 	    IBlockData subData = NMSHandler.getFor( iblockdata );
@@ -197,6 +251,16 @@ public class BananaBlock extends Block {
 	    return subData.getBlock().c( subData, iblockaccess, blockposition );
 	}
 	
+	@Override
+	public int a( IBlockData iblockdata ) {
+	    // Light level emission
+	    IBlockData subData = NMSHandler.getFor( iblockdata );
+	    if ( subData == null ) {
+	        return super.a( iblockdata );
+	    }
+	    return subData.h();
+	}	
+
 	@Override
 	public VoxelShape a( IBlockData iblockdata, IBlockAccess iblockaccess, BlockPosition blockposition, VoxelShapeCollision voxelshapecollision ) {
 	    IBlockData subData = NMSHandler.getFor( iblockdata );

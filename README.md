@@ -14,7 +14,7 @@ Create custom serverside blocks simplified.
 - `dimensionalblocklibrary.admin` - Allows execution of the command.
 
 ## How to get started
-### Creating a custom Dimensional Block
+### Creating a custom block
 The main class involved is the `DBlock` class. It contains all sorts of useful methods for you to manipulate and play around with to get your block to where you want it.
 ```java
 public class CustomBlock extends DBlock {
@@ -53,27 +53,27 @@ DBlockData blockData = DimensionalBlocks.getDBlockDataAt( someLoc );
 A `DState` represents various configurations that your `DBlock` can be in. This is much like the `Rotatable` interface from Bukkit. You can create a custom `DState` for various states that your block can be represented as. Note that this is **not** for storing custom data or a large amount of trivial data. That's what `DTileEntity` is for. To add a `DState` to your block, you'll need to create a state of your own.
 ```java
 public class CustomStateBoolean extends DState< Boolean > {
-	public CustomStateBoolean( String id ) {
-		super( id, Boolean.class );
-	}
+    public CustomStateBoolean( String id ) {
+        super( id, Boolean.class );
+    }
 
-	@Override
-	public String convertToString( Boolean value ) {
-		return Boolean.toString( value );
-	}
+    @Override
+    public String convertToString( Boolean value ) {
+        return Boolean.toString( value );
+    }
 
-	@Override
-	public Optional< Boolean > getFrom( String value ) {
-		if ( value.equalsIgnoreCase( "true" ) || value.equalsIgnoreCase( "false" ) ) {
-			return Optional.of( Boolean.valueOf( value.toUpperCase() ) );
-		}
-		return Optional.empty();
-	}
+    @Override
+    public Optional< Boolean > getFrom( String value ) {
+        if ( value.equalsIgnoreCase( "true" ) || value.equalsIgnoreCase( "false" ) ) {
+            return Optional.of( Boolean.valueOf( value.toUpperCase() ) );
+        }
+        return Optional.empty();
+    }
 
-	@Override
-	public Collection< Boolean > getValues() {
-		return Arrays.asList( true, false );
-	}
+    @Override
+    public Collection< Boolean > getValues() {
+        return Arrays.asList( true, false );
+    }
 }
 ```
 
@@ -87,7 +87,7 @@ public class CustomBlock extends DBlock {
         super( new DInfo( NamespacedKey.minecraft( "custom_block" ), Material.STONE.createBlockData() ) );
     }
     
-	@Override
+    @Override
     public void onRegister() {
         DBlockData defData = getDefaultBlockData();
         defData.set( ROUGH_STONE, false );
@@ -95,7 +95,7 @@ public class CustomBlock extends DBlock {
 
         defData.set( ROUGH_STONE, true );
         defData.setClientBlock( Material.COBBLESTONE.createBlockData() );
-	}
+    }
     
     @Override
     public DState< ? >[] getStates() {
@@ -125,7 +125,7 @@ public class CustomBlock extends DBlock {
         super( new DInfo( NamespacedKey.minecraft( "custom_block" ), Material.STONE.createBlockData() ) );
     }
     
-	@Override
+    @Override
     public void onRegister() {
         DBlockData defData = getDefaultBlockData();
         defData.set( ROUGH_STONE, false );
@@ -133,7 +133,7 @@ public class CustomBlock extends DBlock {
 
         defData.set( ROUGH_STONE, true );
         defData.setClientBlock( Material.COBBLESTONE.createBlockData() );
-	}
+    }
 
     @Override
     public InteractionResult interact( DBlockData data, Location location, HumanEntity entity,
@@ -170,7 +170,7 @@ public class TileEntityIntegerCounter extends DTileEntity {
     }
 
     @Override
-	public void load( NBTCompound compound ) {
+    public void load( NBTCompound compound ) {
         counter = NBTEditor.getInt( compound, "current-count" );
     }
 
@@ -203,7 +203,7 @@ public class CustomBlock extends DBlock {
         super( new DInfo( NamespacedKey.minecraft( "custom_block" ), Material.STONE.createBlockData() ) );
     }
     
-	@Override
+    @Override
     public void onRegister() {
         DBlockData defData = getDefaultBlockData();
         defData.set( ROUGH_STONE, false );
@@ -211,7 +211,7 @@ public class CustomBlock extends DBlock {
 
         defData.set( ROUGH_STONE, true );
         defData.setClientBlock( Material.COBBLESTONE.createBlockData() );
-	}
+    }
 
     @Override
     public InteractionResult interact( DBlockData data, Location location, HumanEntity entity,
@@ -248,9 +248,11 @@ public class CustomBlock extends DBlock {
 Our plugin's main class looks something like this:
 ```java
 public class CustomBlockPlugin extends JavaPlugin {
+    private static CustomBlock CUSTOM_BLOCK;
+
     @Override
     public void onEnable() {
-        CustomBlock CUSTOM_BLOCK = new CustomBlock();
+        CUSTOM_BLOCK = new CustomBlock();
         DimensionalBlocks.register( CUSTOM_BLOCK, TileEntityIntegerCounter::new, "integer_counter" );
     }
 }

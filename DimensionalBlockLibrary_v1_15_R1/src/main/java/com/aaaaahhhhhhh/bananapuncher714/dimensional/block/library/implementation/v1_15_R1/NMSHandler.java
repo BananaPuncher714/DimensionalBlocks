@@ -148,20 +148,30 @@ public class NMSHandler implements com.aaaaahhhhhhh.bananapuncher714.dimensional
 	
 	@Override
 	public DBlockData setDBlockAt( DBlock block, Location location ) {
+	    return setDBlockAt( block, location, false );
+	}
+
+	@Override
+	public DBlockData setDBlockAt( DBlock block, Location location, boolean doPhysics ) {
 	    World world = ( ( CraftWorld ) location.getWorld() ).getHandle();
-	    
+
 	    BlockPosition position = new BlockPosition( location.getBlockX(), location.getBlockY(), location.getBlockZ() );
 	    Block nmsBlock = IRegistry.BLOCK.get( new MinecraftKey( block.getInfo().getKey().toString() ) );
-	    world.setTypeUpdate( position, nmsBlock.getBlockData() );
+	    world.setTypeAndData( position, nmsBlock.getBlockData(), doPhysics ? 3 : 2 );
 	    return getBlockDataAt( location );
 	}
-	
+
 	@Override
 	public void setDBlockDataAt( DBlockData data, Location location ) {
+	    setDBlockDataAt( data, location, false );
+	}
+
+	@Override
+	public void setDBlockDataAt( DBlockData data, Location location, boolean doPhysics ) {
 	    World world = ( ( CraftWorld ) location.getWorld() ).getHandle();
 	    BlockPosition position = new BlockPosition( location.getBlockX(), location.getBlockY(), location.getBlockZ() );
 	    if ( data instanceof BananaBlockData ) {
-	        world.setTypeUpdate( position, ( ( BananaBlockData ) data ).getData() );
+	        world.setTypeAndData( position, ( ( BananaBlockData ) data ).getData(), doPhysics ? 3 : 2 );
 	    }
 	}
 	
@@ -184,6 +194,25 @@ public class NMSHandler implements com.aaaaahhhhhhh.bananapuncher714.dimensional
 	        return ( ( BananaTileEntity ) ent ).getTileEntity();
 	    }
 	    return null;
+	}
+	
+	@Override
+	public void tick( Location location, DBlock block ) {
+        World world = ( ( CraftWorld ) location.getWorld() ).getHandle();
+        BlockPosition position = new BlockPosition( location.getBlockX(), location.getBlockY(), location.getBlockZ() );
+        Block nmsBlock = IRegistry.BLOCK.get( new MinecraftKey( block.getInfo().getKey().toString() ) );
+        if ( !world.getBlockTickList().b( position, nmsBlock ) ) {
+            world.getBlockTickList().a( position, nmsBlock );
+        }
+	}
+	
+	public void tick( Location location, DBlock block, int delay ) {
+	    World world = ( ( CraftWorld ) location.getWorld() ).getHandle();
+	    BlockPosition position = new BlockPosition( location.getBlockX(), location.getBlockY(), location.getBlockZ() );
+	    Block nmsBlock = IRegistry.BLOCK.get( new MinecraftKey( block.getInfo().getKey().toString() ) );
+	    if ( !world.getBlockTickList().b( position, nmsBlock ) ) {
+	        world.getBlockTickList().a( position, nmsBlock, delay );
+	    }
 	}
 	
 	@Override
