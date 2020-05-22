@@ -9,10 +9,14 @@ import org.bukkit.block.BlockFace;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.HumanEntity;
+import org.bukkit.inventory.ItemStack;
 
 import com.aaaaahhhhhhh.bananapuncher714.dimensional.block.library.DimensionalBlocks;
 import com.aaaaahhhhhhh.bananapuncher714.dimensional.block.library.api.world.CollisionResultBlock;
 
+/**
+ * Base class for a custom block.
+ */
 public abstract class DBlock {
 	private final DInfo info;
 	
@@ -75,6 +79,37 @@ public abstract class DBlock {
 	public BlockData getClientBlock( DBlockData data ) {
 		return getData();
 	}
+	
+	/**
+	 * Called when the block gets broken. Drop items and things here.
+	 * 
+	 * @param data
+	 * @param location
+	 * @param item
+	 */
+	public void dropNaturally( DBlockData data, Location location, ItemStack item ) {}
+	
+	/**
+	 * Set whether the entity type can spawn on the given block.
+	 * 
+	 * @param data
+	 * @param location
+	 * @param type
+	 * NamespacedKey of the entity. Follows NMS naming conventions. May not match with Bukkit EntityType enums.
+	 * @return
+	 */
+	public boolean canEntitySpawnOn( DBlockData data, Location location, NamespacedKey type ) {
+		return true;
+	}
+	
+	/**
+	 * Called when a player starts mining a block.
+	 * 
+	 * @param data
+	 * @param location
+	 * @param entity
+	 */
+	public void attackBlock( DBlockData data, Location location, HumanEntity entity ) {}
 	
 	/**
 	 * Called when an entity is standing directly on top of the block.
@@ -214,10 +249,10 @@ public abstract class DBlock {
 	 * 
 	 * @param data
 	 * @param fluid
-	 * Takes on a string name, like "WATER", "FLOWING_WATER", "LAVA", etc.
+	 * Namespaced key id of the fluid.
 	 * @return
 	 */
-	public boolean destroyedByFluid( DBlockData data, String fluid ) {
+	public boolean destroyedByFluid( DBlockData data, NamespacedKey fluid ) {
 		return info.isDestroyableByFluid();
 	}
 	
@@ -245,9 +280,10 @@ public abstract class DBlock {
 	 * Get the color that should show up on the map. It will be matched to the closest available Minecraft color.
 	 * 
 	 * @param data
+	 * @param location
 	 * @return
 	 */
-	public Color getMapColor( DBlockData data ) {
+	public Color getMapColor( DBlockData data, Location location ) {
 		return info.getMapColor();
 	}
 	

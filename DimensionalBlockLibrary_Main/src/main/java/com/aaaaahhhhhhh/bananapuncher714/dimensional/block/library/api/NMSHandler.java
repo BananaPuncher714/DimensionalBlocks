@@ -10,14 +10,17 @@ public interface NMSHandler {
 	boolean register( DBlock block, Supplier< DTileEntity > tileEntity, String id );
 	boolean register( DBlock block );
 	
-	DBlockData getBlockDataAt( Location location );
+	DBlockData getDBlockDataAt( Location location );
 	DBlockData setDBlockAt( DBlock block, Location location );
 	DBlockData setDBlockAt( DBlock block, Location location, boolean doPhysics );
 	void setDBlockDataAt( DBlockData data, Location location );
 	void setDBlockDataAt( DBlockData data, Location location, boolean doPhysics );
 	DBlockData getDefaultBlockDataFor( DBlock block );
-	DBlockData getBlockDataFrom( Block block );
+	DBlockData getDBlockDataFrom( Block block );
 	DTileEntity getDTileEntityAt( Location location );
+	
+	Location getLocationOf( DTileEntity entity );
+	DBlockData getDBlockDataOf( DTileEntity entity );
 	
 	void tick( Location location, DBlock block, int delay );
 	void applyPhysics( DBlock block, Location location );

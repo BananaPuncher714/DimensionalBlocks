@@ -3,6 +3,7 @@ package com.aaaaahhhhhhh.bananapuncher714.dimensional.block.library.implementati
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.lang.ref.WeakReference;
 import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -15,7 +16,6 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.block.BlockFace;
-import org.bukkit.block.data.BlockData;
 import org.bukkit.craftbukkit.v1_15_R1.CraftWorld;
 import org.bukkit.craftbukkit.v1_15_R1.block.CraftBlock;
 import org.bukkit.craftbukkit.v1_15_R1.block.data.CraftBlockData;
@@ -106,6 +106,9 @@ public class NMSHandler implements com.aaaaahhhhhhh.bananapuncher714.dimensional
 
         return true;
 	}
+
+	protected static void register( BananaTileEntity entity ) {
+	}
 	
 	protected static void setRegistryBlockId( IBlockData data, IBlockData clientData ) {
 	    BLOCK_ID_MAP.put( data, BLOCK_ID_MAP.get( clientData ) );
@@ -124,12 +127,12 @@ public class NMSHandler implements com.aaaaahhhhhhh.bananapuncher714.dimensional
 	}
 	
 	@Override
-	public DBlockData getBlockDataAt( Location location ) {
-	    return getBlockDataFrom( location.getBlock() );
+	public DBlockData getDBlockDataAt( Location location ) {
+	    return getDBlockDataFrom( location.getBlock() );
 	}
 	
 	@Override
-	public DBlockData getBlockDataFrom( org.bukkit.block.Block bBlock ) {
+	public DBlockData getDBlockDataFrom( org.bukkit.block.Block bBlock ) {
 	    IBlockData data = ( ( CraftBlock ) bBlock ).getNMS();
 	    Block block = data.getBlock();
 	    if ( block instanceof BananaBlock ) {
@@ -150,7 +153,7 @@ public class NMSHandler implements com.aaaaahhhhhhh.bananapuncher714.dimensional
 	    BlockPosition position = new BlockPosition( location.getBlockX(), location.getBlockY(), location.getBlockZ() );
 	    Block nmsBlock = IRegistry.BLOCK.get( new MinecraftKey( block.getInfo().getKey().toString() ) );
 	    world.setTypeAndData( position, nmsBlock.getBlockData(), doPhysics ? 3 : 2 );
-	    return getBlockDataAt( location );
+	    return getDBlockDataAt( location );
 	}
 
 	@Override
@@ -184,6 +187,33 @@ public class NMSHandler implements com.aaaaahhhhhhh.bananapuncher714.dimensional
 	    TileEntity ent = world.getTileEntity( position );
 	    if ( ent instanceof BananaTileEntity ) {
 	        return ( ( BananaTileEntity ) ent ).getTileEntity();
+	    }
+	    return null;
+	}
+	
+	@Override
+	public Location getLocationOf( DTileEntity entity ) {
+	    WeakReference< BananaTileEntity > bananaTileRef = BananaTileEntity.TILE_ENTITY_MAP.get( entity );
+	    if ( bananaTileRef != null ) {
+	        BananaTileEntity bananaTile = bananaTileRef.get();
+	        if ( bananaTile != null ) {
+	            BlockPosition blockposition = bananaTile.getPosition();
+	            World world = bananaTile.getWorld();
+	            return new Location( world.getWorld(), blockposition.getX(), blockposition.getY(), blockposition.getZ() );
+	        }
+	    }
+	    return null;
+	}
+	
+	@Override
+	public DBlockData getDBlockDataOf( DTileEntity entity ) {
+	    WeakReference< BananaTileEntity > bananaTileRef = BananaTileEntity.TILE_ENTITY_MAP.get( entity );
+	    if ( bananaTileRef != null ) {
+	        BananaTileEntity bananaTile = bananaTileRef.get();
+	        if ( bananaTile != null ) {
+	            IBlockData nmsData = bananaTile.getBlock();
+	            return new BananaBlockData( nmsData );
+	        }
 	    }
 	    return null;
 	}

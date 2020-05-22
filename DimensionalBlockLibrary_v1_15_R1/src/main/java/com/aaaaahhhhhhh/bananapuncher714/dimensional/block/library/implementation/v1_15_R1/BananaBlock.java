@@ -8,10 +8,12 @@ import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.bukkit.Location;
+import org.bukkit.NamespacedKey;
 import org.bukkit.block.BlockFace;
 import org.bukkit.craftbukkit.v1_15_R1.CraftWorld;
 import org.bukkit.craftbukkit.v1_15_R1.block.data.CraftBlockData;
 import org.bukkit.craftbukkit.v1_15_R1.entity.CraftEntity;
+import org.bukkit.craftbukkit.v1_15_R1.inventory.CraftItemStack;
 import org.bukkit.entity.HumanEntity;
 
 import com.aaaaahhhhhhh.bananapuncher714.dimensional.block.library.api.DBlock;
@@ -24,6 +26,7 @@ import net.minecraft.server.v1_15_R1.BlockPosition;
 import net.minecraft.server.v1_15_R1.BlockStateList;
 import net.minecraft.server.v1_15_R1.Entity;
 import net.minecraft.server.v1_15_R1.EntityHuman;
+import net.minecraft.server.v1_15_R1.EntityTypes;
 import net.minecraft.server.v1_15_R1.EnumDirection;
 import net.minecraft.server.v1_15_R1.EnumHand;
 import net.minecraft.server.v1_15_R1.EnumInteractionResult;
@@ -33,6 +36,7 @@ import net.minecraft.server.v1_15_R1.GeneratorAccess;
 import net.minecraft.server.v1_15_R1.IBlockAccess;
 import net.minecraft.server.v1_15_R1.IBlockData;
 import net.minecraft.server.v1_15_R1.IRegistry;
+import net.minecraft.server.v1_15_R1.ItemStack;
 import net.minecraft.server.v1_15_R1.Material;
 import net.minecraft.server.v1_15_R1.MaterialMapColor;
 import net.minecraft.server.v1_15_R1.MinecraftKey;
@@ -67,7 +71,6 @@ public class BananaBlock extends Block {
 	private DBlock block;
 
 	private Map< String, BananaState< ? > > states;
-	private Map< IBlockData, IBlockData > clientStates;
 	
 	public BananaBlock( DBlock block ) {
 	    // Construct the info from the block
@@ -79,6 +82,40 @@ public class BananaBlock extends Block {
 	}
 	
 	// Expose these methods to the user
+	
+	@Override
+	public void dropNaturally( IBlockData iblockdata, World world, BlockPosition blockposition, ItemStack itemstack ) {
+        BananaBlockData data = new BananaBlockData( iblockdata );
+        Location location = new Location( world.getWorld(), blockposition.getX(), blockposition.getY(), blockposition.getZ() );
+	    
+	    block.dropNaturally( data, location, CraftItemStack.asBukkitCopy( itemstack ) );
+	}
+	
+	@Override
+	public void attack( IBlockData iblockdata, World world, BlockPosition blockposition, EntityHuman entityhuman ) {
+	    BananaBlockData data = new BananaBlockData( iblockdata );
+	    Location location = new Location( world.getWorld(), blockposition.getX(), blockposition.getY(), blockposition.getZ() );
+
+	    block.attackBlock( data, location, entityhuman.getBukkitEntity() );
+	}
+	
+	@Override
+	public boolean a( IBlockData iblockdata, IBlockAccess iblockaccess, BlockPosition blockposition, EntityTypes< ? > entitytypes ) {
+	    if ( iblockaccess instanceof World ) {
+	        World world = ( World ) iblockaccess;
+	        BananaBlockData data = new BananaBlockData( iblockdata );
+	        Location location = new Location( world.getWorld(), blockposition.getX(), blockposition.getY(), blockposition.getZ() );
+
+	        MinecraftKey id = entitytypes.h();
+	        NamespacedKey key = new NamespacedKey( id.getNamespace(), id.getKey() );
+	        
+	        return block.canEntitySpawnOn( data, location, key );
+	    }
+	    
+	    return block.getInfo().isCanMobsSpawnOn();
+	}
+	
+	// dropNaturally
 	
 	@Override
 	public int a( IBlockData iblockdata, IBlockAccess iblockaccess, BlockPosition blockposition, EnumDirection enumdirection ) {
@@ -139,7 +176,14 @@ public class BananaBlock extends Block {
 	@Override
 	public MaterialMapColor e( IBlockData iblockdata, IBlockAccess access, BlockPosition position ) {
 	    BananaBlockData data = new BananaBlockData( iblockdata );
-	    Color color = block.getMapColor( data );
+	    Color color;
+	    if ( access instanceof World ) {
+            World world = ( World ) access;
+            Location location = new Location( world.getWorld(), position.getX(), position.getY(), position.getZ() );
+            color = block.getMapColor( data, location );
+        } else {
+            color = block.getInfo().getMapColor();
+        }
 	    return computeNearest( color.getRed(), color.getGreen(), color.getBlue() );
 	}
 	
@@ -152,7 +196,8 @@ public class BananaBlock extends Block {
 	public boolean a( IBlockData iblockdata, FluidType fluidtype ) {
 	    BananaBlockData data = new BananaBlockData( iblockdata );
 	    MinecraftKey id = IRegistry.FLUID.getKey( fluidtype );
-	    return block.destroyedByFluid( data, id.getKey() );
+	    NamespacedKey key = new NamespacedKey( id.getNamespace(), id.getKey() );
+	    return block.destroyedByFluid( data, key );
 	}
 	
 	@Override

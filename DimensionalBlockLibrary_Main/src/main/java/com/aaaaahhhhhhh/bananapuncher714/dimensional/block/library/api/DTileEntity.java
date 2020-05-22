@@ -1,5 +1,8 @@
 package com.aaaaahhhhhhh.bananapuncher714.dimensional.block.library.api;
 
+import org.bukkit.Location;
+
+import com.aaaaahhhhhhh.bananapuncher714.dimensional.block.library.DimensionalBlocks;
 import com.aaaaahhhhhhh.bananapuncher714.dimensional.block.library.util.NBTEditor.NBTCompound;
 
 public abstract class DTileEntity {
@@ -16,4 +19,22 @@ public abstract class DTileEntity {
 	 * @param compound
 	 */
 	public abstract void save( NBTCompound compound );
+	
+	/**
+	 * Get the location associated with this tile entity.
+	 * 
+	 * @return
+	 */
+	public final Location getLocation() {
+		return DimensionalBlocks.getLocationOf( this );
+	}
+	
+	/**
+	 * Get the DBlockData associated with this tile entity.
+	 * 
+	 * @return
+	 */
+	public final DBlockData getBlockData() {
+		return DimensionalBlocks.getDBlockDataOf( this );
+	}
 }

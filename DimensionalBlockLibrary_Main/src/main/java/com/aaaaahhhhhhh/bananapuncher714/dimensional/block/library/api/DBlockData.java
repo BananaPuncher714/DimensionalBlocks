@@ -1,7 +1,5 @@
 package com.aaaaahhhhhhh.bananapuncher714.dimensional.block.library.api;
 
-import org.bukkit.block.data.BlockData;
-
 public interface DBlockData {
 	/**
 	 * Get the {@link DBlock} representing this data.

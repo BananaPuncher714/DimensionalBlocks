@@ -11,14 +11,15 @@ public class DInfo {
 	private boolean burnable = false;
 	private boolean destroyableByFluid = false;
 	private boolean causesSuffocation = true;
+	private boolean canMobsSpawnOn = true;
 	private Color mapColor;
 	private PistonReaction pistonReaction = PistonReaction.NORMAL;
-	private float explosionStrength;
+	private float explosionResistance;
 	
 	public DInfo( NamespacedKey key, BlockData material ) {
 		this.key = key;
 		this.material = material;
-		explosionStrength = material.getMaterial().getBlastResistance();
+		explosionResistance = material.getMaterial().getBlastResistance();
 		mapColor = new Color( 0xFF00FF );
 	}
 	
@@ -58,11 +59,11 @@ public class DInfo {
 	}
 	
 	public final float getExplosionResistance() {
-		return explosionStrength;
+		return explosionResistance;
 	}
 	
 	public final DInfo setExplosionResistance( float explosionStrength ) {
-		this.explosionStrength = explosionStrength;
+		this.explosionResistance = explosionStrength;
 		return this;
 	}
 
@@ -81,6 +82,15 @@ public class DInfo {
 
 	public final DInfo setCausesSuffocation( boolean causesSuffocation ) {
 		this.causesSuffocation = causesSuffocation;
+		return this;
+	}
+
+	public boolean isCanMobsSpawnOn() {
+		return canMobsSpawnOn;
+	}
+
+	public DInfo setCanMobsSpawnOn( boolean canMobsSpawnOn ) {
+		this.canMobsSpawnOn = canMobsSpawnOn;
 		return this;
 	}
 }

@@ -16,6 +16,9 @@ import com.aaaaahhhhhhh.bananapuncher714.dimensional.block.library.api.DTileEnti
 import com.aaaaahhhhhhh.bananapuncher714.dimensional.block.library.api.NMSHandler;
 import com.aaaaahhhhhhh.bananapuncher714.dimensional.block.library.util.ReflectionUtil;
 
+/**
+ * Contains various methods for getting/setting custom block data.
+ */
 public class DimensionalBlocks extends JavaPlugin {
 	private static NMSHandler handler;
 	
@@ -71,7 +74,7 @@ public class DimensionalBlocks extends JavaPlugin {
 	 * A {@link DBlockData} instance, or null if it isn't a custom {@link DBlock}.
 	 */
 	public static DBlockData getDBlockDataAt( Location location ) {
-		return handler.getBlockDataAt( location );
+		return handler.getDBlockDataAt( location );
 	}
 	
 	/**
@@ -83,7 +86,7 @@ public class DimensionalBlocks extends JavaPlugin {
 	 * A {@link DBlockData} instance, or null if the block isn't a {@link DBlock}.
 	 */
 	public static DBlockData getDBlockDataFrom( Block block ) {
-		return handler.getBlockDataFrom( block );
+		return handler.getDBlockDataFrom( block );
 	}
 	
 	/**
@@ -164,6 +167,26 @@ public class DimensionalBlocks extends JavaPlugin {
 	 */
 	public static DTileEntity getDTileEntityAt( Location location ) {
 		return handler.getDTileEntityAt( location );
+	}
+	
+	/**
+	 * Get the location associated with the given tile entity.
+	 * 
+	 * @param entity
+	 * @return
+	 */
+	public static Location getLocationOf( DTileEntity entity ) {
+		return handler.getLocationOf( entity );
+	}
+	
+	/**
+	 * Get the {@link DBlockData} associated with the given tile entity.
+	 * 
+	 * @param entity
+	 * @return
+	 */
+	public static DBlockData getDBlockDataOf( DTileEntity entity ) {
+		return handler.getDBlockDataOf( entity );
 	}
 
 	/**
