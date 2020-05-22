@@ -19,7 +19,6 @@ public interface NMSHandler {
 	DBlockData getBlockDataFrom( Block block );
 	DTileEntity getDTileEntityAt( Location location );
 	
-	void tick( Location location, DBlock block );
 	void tick( Location location, DBlock block, int delay );
 	void applyPhysics( DBlock block, Location location );
 	

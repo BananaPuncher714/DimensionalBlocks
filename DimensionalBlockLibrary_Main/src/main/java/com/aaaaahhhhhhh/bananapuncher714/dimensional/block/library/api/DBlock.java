@@ -36,10 +36,6 @@ public abstract class DBlock {
 		return DimensionalBlocks.getDefaultBlockDataFor( this );
 	}
 	
-	public final void tickLater( Location location ) {
-		DimensionalBlocks.tickLocation( location, this );
-	}
-	
 	public final void tickLater( Location location, int delay ) {
 		DimensionalBlocks.tickLocation( location, this, delay );
 	}

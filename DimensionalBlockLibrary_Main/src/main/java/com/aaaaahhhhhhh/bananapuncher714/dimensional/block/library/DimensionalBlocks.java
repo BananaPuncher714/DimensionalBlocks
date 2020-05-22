@@ -80,10 +80,6 @@ public class DimensionalBlocks extends JavaPlugin {
 		handler.tick( location, block, delay );
 	}
 	
-	public static void tickLocation( Location location, DBlock block ) {
-		handler.tick( location, block );
-	}
-	
 	public static void applyPhysics( DBlock block, Location location ) {
 		handler.applyPhysics( block, location );
 	}
