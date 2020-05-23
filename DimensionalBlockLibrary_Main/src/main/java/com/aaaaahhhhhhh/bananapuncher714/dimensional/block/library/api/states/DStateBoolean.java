@@ -43,7 +43,7 @@ public class DStateBoolean extends DState< Boolean > {
 	 * @param id
 	 * @return
 	 */
-	public DStateBoolean of( String id ) {
+	public static DStateBoolean of( String id ) {
 		return new DStateBoolean( id );
 	}
 }
