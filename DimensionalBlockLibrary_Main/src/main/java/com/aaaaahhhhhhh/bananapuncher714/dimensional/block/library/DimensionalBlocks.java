@@ -32,7 +32,7 @@ public class DimensionalBlocks extends JavaPlugin {
 		if ( sender.hasPermission( "dimensionalblocklibrary.admin" ) ) {
 			File dump = new File( getDataFolder() + "/" + "dump.txt" );
 			createBlockStateDumpFile( dump );
-			sender.sendMessage( ChatColor.BLUE + "Dumped block state files!" );
+			sender.sendMessage( ChatColor.BLUE + "Dumped block states to file!" );
 		} else {
 			sender.sendMessage( ChatColor.RED + "You do not have permission to run this command!" );
 		}

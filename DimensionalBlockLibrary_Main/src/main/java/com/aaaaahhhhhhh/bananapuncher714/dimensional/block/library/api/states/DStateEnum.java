@@ -30,7 +30,7 @@ public class DStateEnum< T extends Enum< T > > extends DState< T > {
 		
 		for ( T v : values ) {
 			String name = v.name().toLowerCase();
-			if ( mappedVals.put( v.name(), v ) != null ) {
+			if ( mappedVals.put( name, v ) != null ) {
 				throw new IllegalArgumentException( "Multiple values have the same name '" + name + "'" );
 			}
 		}
