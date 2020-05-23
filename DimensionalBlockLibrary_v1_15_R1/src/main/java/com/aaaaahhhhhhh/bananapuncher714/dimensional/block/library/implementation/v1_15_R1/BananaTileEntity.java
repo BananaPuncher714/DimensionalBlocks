@@ -8,11 +8,12 @@ import com.aaaaahhhhhhh.bananapuncher714.dimensional.block.library.api.DTileEnti
 import com.aaaaahhhhhhh.bananapuncher714.dimensional.block.library.util.NBTEditor.NBTCompound;
 
 import net.minecraft.server.v1_15_R1.IRegistry;
+import net.minecraft.server.v1_15_R1.ITickable;
 import net.minecraft.server.v1_15_R1.MinecraftKey;
 import net.minecraft.server.v1_15_R1.NBTTagCompound;
 import net.minecraft.server.v1_15_R1.TileEntity;
 
-public class BananaTileEntity extends TileEntity {
+public class BananaTileEntity extends TileEntity implements ITickable {
     protected static Map< DTileEntity, WeakReference< BananaTileEntity > > TILE_ENTITY_MAP = new HashMap< DTileEntity, WeakReference< BananaTileEntity > >();
     
     private DTileEntity tileEntity;
@@ -40,5 +41,10 @@ public class BananaTileEntity extends TileEntity {
         super.save( nbttagcompound );
         tileEntity.save( new NBTCompound( nbttagcompound ) );
         return nbttagcompound;
+    }
+
+    @Override
+    public void tick() {
+        tileEntity.tick();
     }
 }

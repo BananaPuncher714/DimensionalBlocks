@@ -21,6 +21,11 @@ public abstract class DTileEntity {
 	public abstract void save( NBTCompound compound );
 	
 	/**
+	 * Called once a tick.
+	 */
+	public void tick() {};
+	
+	/**
 	 * Get the location associated with this tile entity.
 	 * 
 	 * @return
