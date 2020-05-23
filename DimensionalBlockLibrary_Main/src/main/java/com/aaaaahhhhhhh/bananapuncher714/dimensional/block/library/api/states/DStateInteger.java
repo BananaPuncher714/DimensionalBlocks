@@ -63,6 +63,16 @@ public class DStateInteger extends DState< Integer > {
 		return vals;
 	}
 
+	/**
+	 * Create a new DStateInteger with a range from the min to max, inclusive.
+	 * 
+	 * @param id
+	 * @param min
+	 * The minimum number that this state can take on.
+	 * @param max
+	 * The maximum number that this state can take on.
+	 * @return
+	 */
 	public static DStateInteger of( String id, int min, int max ) {
 		return new DStateInteger( id, min, max );
 	}

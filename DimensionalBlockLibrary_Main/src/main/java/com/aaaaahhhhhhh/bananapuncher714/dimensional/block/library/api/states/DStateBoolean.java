@@ -37,7 +37,12 @@ public class DStateBoolean extends DState< Boolean > {
 		return values;
 	}
 	
-	
+	/**
+	 * Create a new DStateBoolean with the provided id.
+	 * 
+	 * @param id
+	 * @return
+	 */
 	public DStateBoolean of( String id ) {
 		return new DStateBoolean( id );
 	}

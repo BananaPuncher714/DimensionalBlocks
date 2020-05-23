@@ -32,7 +32,16 @@ public class BananaBlockData implements DBlockData {
         data = block.set( state, value, data );
         return this;
     }
-
+    
+    @Override
+    public < T extends Comparable< T > > T increment( DState< T > state ) {
+        if ( locked ) {
+            throw new IllegalArgumentException( "Unable to modify locked data!" );
+        }
+        data = block.increment( state, data );
+        return block.get( state, data );
+    }
+    
     @Override
     public DBlock getBlock() {
         return block.getBlock();

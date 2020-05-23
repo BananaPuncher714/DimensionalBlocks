@@ -31,4 +31,13 @@ public interface DBlockData {
 	 * @return
 	 */
 	< T extends Comparable< T > > DBlockData set( DState< T > state, T value );
+	
+	/**
+	 * Increment the DBlockData to the next available state.
+	 * 
+	 * @param <T>
+	 * @param state
+	 * @return
+	 */
+	< T extends Comparable< T > > T increment( DState< T > state );
 }

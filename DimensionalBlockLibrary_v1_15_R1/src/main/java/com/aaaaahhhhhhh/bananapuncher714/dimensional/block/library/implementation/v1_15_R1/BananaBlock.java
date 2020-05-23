@@ -367,6 +367,20 @@ public class BananaBlock extends Block {
 	    }
 	}
 	
+	public < T extends Comparable< T > > IBlockData increment( DState< T > state, IBlockData data ) {
+	    String id = state.getId();
+	    BananaState< T > bState = ( BananaState< T > ) states.get( id );
+	    if ( bState == null ) {
+	        throw new IllegalArgumentException( "State not part of this block!" );
+	    }
+	    DState< T > dState = bState.getState();
+	    if ( dState.equals( state ) ) {
+	        return data.a( bState );
+	    } else {
+	        throw new IllegalArgumentException( "Requested Invalid State" );
+	    }
+	}
+	
 	protected void setAsDefault( IBlockData data ) {
 	    p( data );
 	}

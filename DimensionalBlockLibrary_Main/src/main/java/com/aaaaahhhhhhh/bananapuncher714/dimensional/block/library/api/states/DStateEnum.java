@@ -51,19 +51,54 @@ public class DStateEnum< T extends Enum< T > > extends DState< T > {
 		return values;
 	}
 
+	/**
+	 * Create a new DStateEnum for the provided enum and all the values.
+	 * 
+	 * @param <T>
+	 * @param id
+	 * @param clazz
+	 * @return
+	 */
 	public static < T extends Enum< T > > DStateEnum< T > of( String id, Class< T > clazz ) {
 		return of( id, clazz, Predicates.alwaysTrue() );
 	}
 
+	/**
+	 * Create a new DStateEnum for the provided enum and values that fit the predicate.
+	 * 
+	 * @param <T>
+	 * @param id
+	 * @param clazz
+	 * @param predicate
+	 * @return
+	 */
 	public static < T extends Enum< T > > DStateEnum< T > of( String id, Class< T > clazz, Predicate< T > predicate ) {
 		return of( id, clazz, Arrays.stream( clazz.getEnumConstants() ).filter( predicate ).collect( Collectors.toList() ) );
 	}
 	
+	/**
+	 * Create a new DStateEnum for the provided values of that enum.
+	 * 
+	 * @param <T>
+	 * @param id
+	 * @param clazz
+	 * @param vals
+	 * @return
+	 */
 	@SafeVarargs
 	public static < T extends Enum< T > > DStateEnum< T > of( String id, Class< T > clazz, T... vals ) {
 		return of( id, clazz, Arrays.asList( vals ) );
 	}
 	
+	/**
+	 * Create a new DStateEnum for the provided values of that enum.
+	 * 
+	 * @param <T>
+	 * @param id
+	 * @param clazz
+	 * @param vals
+	 * @return
+	 */
 	public static < T extends Enum< T > > DStateEnum< T > of( String id, Class< T > clazz, Collection< T > vals ) {
 		return new DStateEnum< T >( id, clazz, vals );
 	}
