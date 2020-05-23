@@ -84,6 +84,14 @@ public class BananaBlock extends Block {
 	// Expose these methods to the user
 	
 	@Override
+	public void a( IBlockData iblockdata, World world, BlockPosition blockposition, Entity entity ) {
+	    BananaBlockData data = new BananaBlockData( iblockdata );
+	    Location location = new Location( world.getWorld(), blockposition.getX(), blockposition.getY(), blockposition.getZ() );
+
+	    block.onContact( data, location, entity.getBukkitEntity() );
+	}
+	
+	@Override
 	public void dropNaturally( IBlockData iblockdata, World world, BlockPosition blockposition, ItemStack itemstack ) {
         BananaBlockData data = new BananaBlockData( iblockdata );
         Location location = new Location( world.getWorld(), blockposition.getX(), blockposition.getY(), blockposition.getZ() );

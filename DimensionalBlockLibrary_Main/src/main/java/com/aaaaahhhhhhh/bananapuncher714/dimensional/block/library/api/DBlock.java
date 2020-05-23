@@ -81,6 +81,15 @@ public abstract class DBlock {
 	}
 	
 	/**
+	 * Called when an entity touches, or is inside the block.
+	 * 
+	 * @param data
+	 * @param location
+	 * @param entity
+	 */
+	public void onContact( DBlockData data, Location location, Entity entity ) {}
+	
+	/**
 	 * Called when the block gets broken. Drop items and things here.
 	 * 
 	 * @param data
