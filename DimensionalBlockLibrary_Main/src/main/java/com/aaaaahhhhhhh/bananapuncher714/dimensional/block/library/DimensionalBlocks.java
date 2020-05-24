@@ -3,8 +3,11 @@ package com.aaaaahhhhhhh.bananapuncher714.dimensional.block.library;
 import java.io.File;
 import java.util.function.Supplier;
 
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.Chunk;
 import org.bukkit.Location;
+import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -25,6 +28,15 @@ public class DimensionalBlocks extends JavaPlugin {
 	@Override
 	public void onEnable() {
 		handler = ReflectionUtil.getNewNMSHandlerInstance();
+		
+		if ( !Bukkit.getWorlds().isEmpty() ) {
+			Bukkit.getScheduler().runTask( this, this::cleanAllTheOldBlocksAwayBecauseSomeNoobDecidedItWasAGoodIdeaToReloadTheServer );
+		}
+	}
+	
+	@Override
+	public void onDisable() {
+		handler.abandonShip();
 	}
 	
 	@Override
@@ -37,6 +49,21 @@ public class DimensionalBlocks extends JavaPlugin {
 			sender.sendMessage( ChatColor.RED + "You do not have permission to run this command!" );
 		}
 		return true;
+	}
+	
+	private void cleanAllTheOldBlocksAwayBecauseSomeNoobDecidedItWasAGoodIdeaToReloadTheServer() {
+		getLogger().severe( "Looks like someone decided it was a good idea to reload the server..." );
+		getLogger().severe( "Cleaning the worlds..." );
+		for ( World world : Bukkit.getWorlds() ) {
+			getLogger().severe( "Cleaning world '" + world.getName() + "'" );
+			for ( Chunk chunk : world.getLoadedChunks() ) {
+				int amount = handler.cleanChunk( chunk );
+				if ( amount > 0 ) {
+					getLogger().severe( "Detected " + amount + " old block(s) in chunk (" + chunk.getX() + ", " + chunk.getZ() + ")" );
+				}
+			}
+		}
+		getLogger().severe( "Cleaning complete!" );
 	}
 	
 	/**

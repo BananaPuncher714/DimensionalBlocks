@@ -5,10 +5,13 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.IdentityHashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Supplier;
 
@@ -16,6 +19,7 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.block.BlockFace;
+import org.bukkit.craftbukkit.v1_15_R1.CraftChunk;
 import org.bukkit.craftbukkit.v1_15_R1.CraftWorld;
 import org.bukkit.craftbukkit.v1_15_R1.block.CraftBlock;
 import org.bukkit.craftbukkit.v1_15_R1.block.data.CraftBlockData;
@@ -26,13 +30,18 @@ import com.aaaaahhhhhhh.bananapuncher714.dimensional.block.library.api.DBlockDat
 import com.aaaaahhhhhhh.bananapuncher714.dimensional.block.library.api.DInfo;
 import com.aaaaahhhhhhh.bananapuncher714.dimensional.block.library.api.DTileEntity;
 import com.aaaaahhhhhhh.bananapuncher714.dimensional.block.library.api.world.CollisionResultBlock;
+import com.mojang.brigadier.StringReader;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 
+import net.minecraft.server.v1_15_R1.ArgumentBlock;
 import net.minecraft.server.v1_15_R1.Block;
 import net.minecraft.server.v1_15_R1.BlockPosition;
+import net.minecraft.server.v1_15_R1.Chunk;
 import net.minecraft.server.v1_15_R1.IBlockData;
 import net.minecraft.server.v1_15_R1.IRegistry;
 import net.minecraft.server.v1_15_R1.MinecraftKey;
 import net.minecraft.server.v1_15_R1.MovingObjectPositionBlock;
+import net.minecraft.server.v1_15_R1.NBTTagCompound;
 import net.minecraft.server.v1_15_R1.RegistryBlockID;
 import net.minecraft.server.v1_15_R1.TileEntity;
 import net.minecraft.server.v1_15_R1.TileEntityTypes;
@@ -233,6 +242,77 @@ public class NMSHandler implements com.aaaaahhhhhhh.bananapuncher714.dimensional
 	    BlockPosition position = new BlockPosition( location.getBlockX(), location.getBlockY(), location.getBlockZ() );
 	    Block nmsBlock = IRegistry.BLOCK.get( new MinecraftKey( block.getInfo().getKey().toString() ) );
 	    world.applyPhysics( position, nmsBlock );
+	}
+	
+	@Override
+	public void abandonShip() {
+	    BananaTileEntity.TILE_ENTITY_MAP.values().forEach( t -> { t.get().saveTheCurrentCompoundBecauseSomeNoobDecidedToReloadTheServer(); } );
+	}
+	
+	@Override
+	public int cleanChunk( org.bukkit.Chunk craftChunk ) {
+	    Chunk chunk = ( ( CraftChunk ) craftChunk ).getHandle();
+	    
+	    int relX = craftChunk.getX() << 4;
+	    int relZ = craftChunk.getZ() << 4;
+	    
+	    int old = 0;
+	    for ( int h = 0; h < 16; h++ ) {
+	        int relY = h << 4;
+	        for ( int x = 0; x < 16; x++ ) {
+	            for ( int y = 0; y < 16; y++ ) {
+	                for ( int z = 0; z < 16; z++ ) {
+	                    BlockPosition blockPos = new BlockPosition( relX + x, relY + y, relZ + z );
+	                    
+	                    IBlockData blockData = chunk.getType( blockPos );
+	                    
+	                    Block block = blockData.getBlock();
+	                    
+	                    TileEntity entity = chunk.getTileEntity( blockPos );
+	                    
+	                    String name = block.getClass().getSimpleName();
+	                    if ( name.contains( "BananaBlock" ) && !( block instanceof BananaBlock ) ) {
+                            try {
+                                Method getNamespacedKeyMethod = block.getClass().getMethod( "getKey" );
+                                NamespacedKey key = ( NamespacedKey ) getNamespacedKeyMethod.invoke( block );
+                                
+                                // Convert the old block to a new block
+                                String extraData = blockData.toString();
+                                StringReader reader = new StringReader( key + extraData.substring( extraData.indexOf( '[' ) ) );
+                                ArgumentBlock argBlock = new ArgumentBlock( reader, false ).a( false );
+                                
+                                IBlockData newData = argBlock.getBlockData();
+
+                                NBTTagCompound compound = new NBTTagCompound();
+                                if ( entity != null ) {
+                                    String tileName = entity.getClass().getSimpleName();
+                                    if ( tileName.equals( "BananaTileEntity" ) ) {
+                                        Method getSavedNBTTagCompoundMethod = entity.getClass().getMethod( "getSavedNBTTagCompound" );
+                                        Optional< NBTTagCompound > optionalCompound = ( Optional< NBTTagCompound > ) getSavedNBTTagCompoundMethod.invoke( entity );
+                                        if ( optionalCompound.isPresent() ) {
+                                            compound = optionalCompound.get();
+                                        }
+                                    }
+                                }
+
+                                chunk.setType( blockPos, newData, false );
+                                
+                                entity = chunk.getTileEntity( blockPos );
+                                
+                                if ( entity != null ) {
+                                    entity.load( compound );
+                                }
+                                
+                                old++;
+                            } catch ( NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | CommandSyntaxException e ) {
+                                e.printStackTrace();
+                            }
+	                    }
+	                }
+	            }
+	        }
+	    }
+	    return old;
 	}
 	
 	@Override

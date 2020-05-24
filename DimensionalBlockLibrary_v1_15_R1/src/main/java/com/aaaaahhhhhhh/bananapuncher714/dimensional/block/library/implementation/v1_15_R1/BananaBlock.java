@@ -69,6 +69,7 @@ public class BananaBlock extends Block {
 	}
 	
 	private DBlock block;
+	private NamespacedKey key;
 
 	private Map< String, BananaState< ? > > states;
 	
@@ -77,6 +78,7 @@ public class BananaBlock extends Block {
 		super( getInfoFrom( block ) );
 		
 		this.block = block;
+		this.key = block.getKey();
 		
 		initializeStates( block );
 	}
@@ -337,6 +339,10 @@ public class BananaBlock extends Block {
     
 	public DBlock getBlock() {
 	    return block;
+	}
+	
+	public NamespacedKey getKey() {
+	    return key;
 	}
 	
 	public < T extends Comparable< T > > T get( DState< T > state, IBlockData data ) {
