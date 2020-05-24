@@ -4,13 +4,13 @@
 	<modelVersion>4.0.0</modelVersion>
 	
 	<properties>
-		<revision>1.1.7</revision>
+		<revision>1.1.8</revision>
 	</properties>
 	
 	<parent>
 		<groupId>com.aaaaahhhhhhh.bananapuncher714</groupId>
 		<artifactId>DimensionalBlockLibrary_Master</artifactId>
-		<version>1.1.7</version>
+		<version>1.1.8</version>
 	</parent>
 	<artifactId>DimensionalBlockLibrary_v1_15_R1</artifactId>
 
