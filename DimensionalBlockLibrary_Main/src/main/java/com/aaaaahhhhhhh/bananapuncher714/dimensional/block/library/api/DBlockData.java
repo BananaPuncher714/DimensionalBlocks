@@ -1,5 +1,7 @@
 package com.aaaaahhhhhhh.bananapuncher714.dimensional.block.library.api;
 
+import org.bukkit.util.BoundingBox;
+
 public interface DBlockData {
 	/**
 	 * Get the {@link DBlock} representing this data.
@@ -12,6 +14,20 @@ public interface DBlockData {
 	 * Set this as the default data when the block gets placed.
 	 */
 	void setAsDefault();
+
+	/**
+	 * Get the bounding boxes that make up the collidable shape of the block.
+	 * 
+	 * @return
+	 */
+	BoundingBox[] getCollisionShape();
+	
+	/**
+	 * Get the bounding boxes that make up the visible hitbox of the block.
+	 * 
+	 * @return
+	 */
+	BoundingBox[] getHitbox();
 	
 	/**
 	 * Get the value of one of the states of this data. The {@link DState} must be included in the {@link DBlock#getStates()} method.

@@ -112,6 +112,17 @@ public abstract class DBlock {
 	}
 	
 	/**
+	 * Set whether the block is occluding, such as preventing chests from being accessible.
+	 * 
+	 * @param data
+	 * @param location
+	 * @return
+	 */
+	public boolean isOccluding( DBlockData data, Location location ) {
+		return info.isOccluding();
+	}
+	
+	/**
 	 * Called when a player starts mining a block.
 	 * 
 	 * @param data

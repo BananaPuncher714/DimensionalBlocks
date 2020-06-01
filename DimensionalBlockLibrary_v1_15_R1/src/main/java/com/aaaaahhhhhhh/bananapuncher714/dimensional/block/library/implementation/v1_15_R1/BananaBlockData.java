@@ -1,5 +1,7 @@
 package com.aaaaahhhhhhh.bananapuncher714.dimensional.block.library.implementation.v1_15_R1;
 
+import org.bukkit.util.BoundingBox;
+
 import com.aaaaahhhhhhh.bananapuncher714.dimensional.block.library.api.DBlock;
 import com.aaaaahhhhhhh.bananapuncher714.dimensional.block.library.api.DBlockData;
 import com.aaaaahhhhhhh.bananapuncher714.dimensional.block.library.api.DState;
@@ -17,6 +19,16 @@ public class BananaBlockData implements DBlockData {
         }
         this.data = data;
         this.block = ( BananaBlock ) data.getBlock();
+    }
+    
+    @Override
+    public BoundingBox[] getCollisionShape() {
+        return NMSHandler.convertFrom( data.getCollisionShape( null, null ) );
+    }
+    
+    @Override
+    public BoundingBox[] getHitbox() {
+        return NMSHandler.convertFrom( data.getShape( null, null ) );
     }
     
     @Override

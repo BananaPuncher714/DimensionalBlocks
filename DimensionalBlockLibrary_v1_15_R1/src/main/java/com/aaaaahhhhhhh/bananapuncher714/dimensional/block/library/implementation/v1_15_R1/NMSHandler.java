@@ -24,6 +24,7 @@ import org.bukkit.craftbukkit.v1_15_R1.CraftWorld;
 import org.bukkit.craftbukkit.v1_15_R1.block.CraftBlock;
 import org.bukkit.craftbukkit.v1_15_R1.block.data.CraftBlockData;
 import org.bukkit.craftbukkit.v1_15_R1.util.CraftMagicNumbers;
+import org.bukkit.util.BoundingBox;
 
 import com.aaaaahhhhhhh.bananapuncher714.dimensional.block.library.api.DBlock;
 import com.aaaaahhhhhhh.bananapuncher714.dimensional.block.library.api.DBlockData;
@@ -46,6 +47,7 @@ import net.minecraft.server.v1_15_R1.RegistryBlockID;
 import net.minecraft.server.v1_15_R1.TileEntity;
 import net.minecraft.server.v1_15_R1.TileEntityTypes;
 import net.minecraft.server.v1_15_R1.Vec3D;
+import net.minecraft.server.v1_15_R1.VoxelShape;
 import net.minecraft.server.v1_15_R1.World;
 
 public class NMSHandler implements com.aaaaahhhhhhh.bananapuncher714.dimensional.block.library.api.NMSHandler {
@@ -133,6 +135,12 @@ public class NMSHandler implements com.aaaaahhhhhhh.bananapuncher714.dimensional
 	    Vec3D fin = position.getPos();
 	    Location interception = new Location( world.getWorld(), fin.getX(), fin.getY(), fin.getZ() );
 	    return new CollisionResultBlock( interception, face, block );
+	}
+	
+	protected static BoundingBox[] convertFrom( VoxelShape shape ) {
+	    return shape.d().stream()
+	        .map( aabb -> { return new BoundingBox( aabb.minX, aabb.minY, aabb.minZ, aabb.maxX, aabb.maxY, aabb.maxZ ); } )
+	        .toArray( BoundingBox[]::new );
 	}
 	
 	@Override

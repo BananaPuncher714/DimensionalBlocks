@@ -12,6 +12,7 @@ public class DInfo {
 	private boolean destroyableByFluid = false;
 	private boolean causesSuffocation = true;
 	private boolean canMobsSpawnOn = true;
+	private boolean occluding = true;
 	private Color mapColor;
 	private PistonReaction pistonReaction = PistonReaction.NORMAL;
 	private float explosionResistance;
@@ -91,6 +92,15 @@ public class DInfo {
 
 	public DInfo setCanMobsSpawnOn( boolean canMobsSpawnOn ) {
 		this.canMobsSpawnOn = canMobsSpawnOn;
+		return this;
+	}
+
+	public boolean isOccluding() {
+		return occluding;
+	}
+
+	public DInfo setOccluding( boolean occluding ) {
+		this.occluding = occluding;
 		return this;
 	}
 }
