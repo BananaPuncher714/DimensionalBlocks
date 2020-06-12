@@ -1,5 +1,7 @@
 package com.aaaaahhhhhhh.bananapuncher714.dimensional.block.library.implementation.v1_15_R1;
 
+import org.bukkit.block.data.BlockData;
+import org.bukkit.craftbukkit.v1_15_R1.block.data.CraftBlockData;
 import org.bukkit.util.BoundingBox;
 
 import com.aaaaahhhhhhh.bananapuncher714.dimensional.block.library.api.DBlock;
@@ -57,6 +59,12 @@ public class BananaBlockData implements DBlockData {
     @Override
     public DBlock getBlock() {
         return block.getBlock();
+    }
+
+    @Override
+    public BlockData getBlockData() {
+        IBlockData representation = NMSHandler.getFor( data );
+        return CraftBlockData.fromData( representation );
     }
     
     @Override

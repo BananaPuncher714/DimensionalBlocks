@@ -85,8 +85,6 @@ public class BananaBlock extends Block {
 
     // Expose these methods to the user
 
-
-
     @Override
     public boolean isOccluding( IBlockData iblockdata, IBlockAccess iblockaccess, BlockPosition blockposition ) {
         if ( iblockaccess instanceof World ) {

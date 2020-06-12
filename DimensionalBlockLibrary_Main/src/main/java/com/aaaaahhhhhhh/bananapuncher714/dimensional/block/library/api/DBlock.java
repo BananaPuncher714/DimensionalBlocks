@@ -79,7 +79,7 @@ public abstract class DBlock {
 	public BlockData getClientBlock( DBlockData data ) {
 		return getData();
 	}
-	
+
 	/**
 	 * Called when an entity touches, or is inside the block.
 	 * 

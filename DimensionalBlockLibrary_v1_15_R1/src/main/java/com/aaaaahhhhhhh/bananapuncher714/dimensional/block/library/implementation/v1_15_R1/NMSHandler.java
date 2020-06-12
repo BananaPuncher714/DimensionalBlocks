@@ -22,7 +22,6 @@ import org.bukkit.block.BlockFace;
 import org.bukkit.craftbukkit.v1_15_R1.CraftChunk;
 import org.bukkit.craftbukkit.v1_15_R1.CraftWorld;
 import org.bukkit.craftbukkit.v1_15_R1.block.CraftBlock;
-import org.bukkit.craftbukkit.v1_15_R1.block.data.CraftBlockData;
 import org.bukkit.craftbukkit.v1_15_R1.util.CraftMagicNumbers;
 import org.bukkit.util.BoundingBox;
 
@@ -109,8 +108,8 @@ public class NMSHandler implements com.aaaaahhhhhhh.bananapuncher714.dimensional
         IRegistry.a( IRegistry.BLOCK, info.getKey().toString(), nmsBlock );
 
         // Add it to the NMS -> Material dictionary
-        CraftBlockData data = ( CraftBlockData ) info.getBlockData();
-        BLOCK_MATERIAL.put( nmsBlock, data.getMaterial() );
+        // Use air because who knows what might happen if we use something else
+        BLOCK_MATERIAL.put( nmsBlock, Material.AIR );
         
         // Let the block do whatever steps it needs
         block.onRegister();

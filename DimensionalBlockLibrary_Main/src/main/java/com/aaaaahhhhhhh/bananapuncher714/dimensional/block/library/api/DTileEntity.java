@@ -24,7 +24,7 @@ public abstract class DTileEntity {
 	 * Called once a tick.
 	 */
 	public void tick() {};
-	
+
 	/**
 	 * Get the location associated with this tile entity.
 	 * 

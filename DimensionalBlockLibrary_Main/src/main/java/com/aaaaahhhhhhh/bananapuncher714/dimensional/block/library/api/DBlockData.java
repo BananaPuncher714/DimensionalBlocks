@@ -1,8 +1,16 @@
 package com.aaaaahhhhhhh.bananapuncher714.dimensional.block.library.api;
 
+import org.bukkit.block.data.BlockData;
 import org.bukkit.util.BoundingBox;
 
 public interface DBlockData {
+	/**
+	 * Get the BlockData associated with this state.
+	 * 
+	 * @return
+	 */
+	BlockData getBlockData();
+	
 	/**
 	 * Get the {@link DBlock} representing this data.
 	 * 

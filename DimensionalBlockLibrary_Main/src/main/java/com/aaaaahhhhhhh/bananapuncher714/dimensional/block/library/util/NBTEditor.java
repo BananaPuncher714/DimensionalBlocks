@@ -5,6 +5,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Base64;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -22,9 +23,6 @@ import org.bukkit.entity.Entity;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
-import com.mojang.authlib.GameProfile;
-import com.mojang.authlib.properties.Property;
-
 /**
  * Sets/Gets NBT tags from ItemStacks 
  * Supports 1.8-1.15
@@ -32,7 +30,7 @@ import com.mojang.authlib.properties.Property;
  * Github: https://github.com/BananaPuncher714/NBTEditor
  * Spigot: https://www.spigotmc.org/threads/269621/
  * 
- * @version 7.14
+ * @version 7.15
  * @author BananaPuncher714
  */
 public final class NBTEditor {
@@ -49,7 +47,7 @@ public final class NBTEditor {
 	static {
 		VERSION = Bukkit.getServer().getClass().getPackage().getName().split("\\.")[3];
 		LOCAL_VERSION = MinecraftVersion.get( VERSION );
-		
+
 		classCache = new HashMap< String, Class<?> >();
 		try {
 			classCache.put( "NBTBase", Class.forName( "net.minecraft.server." + VERSION + "." + "NBTBase" ) );
@@ -60,7 +58,7 @@ public final class NBTEditor {
 			classCache.put( "ItemStack", Class.forName( "net.minecraft.server." + VERSION + "." + "ItemStack" ) );
 			classCache.put( "CraftItemStack", Class.forName( "org.bukkit.craftbukkit." + VERSION + ".inventory." + "CraftItemStack" ) );
 			classCache.put( "CraftMetaSkull", Class.forName( "org.bukkit.craftbukkit." + VERSION + ".inventory." + "CraftMetaSkull" ) );
-			
+
 			classCache.put( "Entity", Class.forName( "net.minecraft.server." + VERSION + "." + "Entity" ) );
 			classCache.put( "CraftEntity", Class.forName( "org.bukkit.craftbukkit." + VERSION + ".entity." + "CraftEntity" ) );
 			classCache.put( "EntityLiving", Class.forName( "net.minecraft.server." + VERSION + "." + "EntityLiving" ) );
@@ -70,15 +68,20 @@ public final class NBTEditor {
 			classCache.put( "BlockPosition", Class.forName( "net.minecraft.server." + VERSION + "." + "BlockPosition" ) );
 			classCache.put( "TileEntity", Class.forName( "net.minecraft.server." + VERSION + "." + "TileEntity" ) );
 			classCache.put( "World", Class.forName( "net.minecraft.server." + VERSION + "." + "World" ) );
-			
+
 			classCache.put( "TileEntitySkull", Class.forName( "net.minecraft.server." + VERSION + "." + "TileEntitySkull" ) );
-		} catch (ClassNotFoundException e) {
+
+			classCache.put( "GameProfile", Class.forName( "com.mojang.authlib.GameProfile" ) );
+			classCache.put( "Property", Class.forName( "com.mojang.authlib.properties.Property" ) );
+			classCache.put( "PropertyMap", Class.forName( "com.mojang.authlib.properties.PropertyMap" ) );
+		} catch ( ClassNotFoundException e ) {
 			e.printStackTrace();
 		}
 
 		NBTClasses = new HashMap< Class< ? >, Class< ? > >();
 		try {
 			NBTClasses.put( Byte.class, Class.forName( "net.minecraft.server." + VERSION + "." + "NBTTagByte" ) );
+			NBTClasses.put( Boolean.class, Class.forName( "net.minecraft.server." + VERSION + "." + "NBTTagByte" ) );
 			NBTClasses.put( String.class, Class.forName( "net.minecraft.server." + VERSION + "." + "NBTTagString" ) );
 			NBTClasses.put( Double.class, Class.forName( "net.minecraft.server." + VERSION + "." + "NBTTagDouble" ) );
 			NBTClasses.put( Integer.class, Class.forName( "net.minecraft.server." + VERSION + "." + "NBTTagInt" ) );
@@ -87,7 +90,7 @@ public final class NBTEditor {
 			NBTClasses.put( Float.class, Class.forName( "net.minecraft.server." + VERSION + "." + "NBTTagFloat" ) );
 			NBTClasses.put( Class.forName( "[B" ), Class.forName( "net.minecraft.server." + VERSION + "." + "NBTTagByteArray" ) );
 			NBTClasses.put( Class.forName( "[I" ), Class.forName( "net.minecraft.server." + VERSION + "." + "NBTTagIntArray" ) );
-		} catch (ClassNotFoundException e) {
+		} catch ( ClassNotFoundException e ) {
 			e.printStackTrace();
 		}
 
@@ -100,18 +103,24 @@ public final class NBTEditor {
 			if ( LOCAL_VERSION.greaterThanOrEqualTo( MinecraftVersion.v1_14 ) ) {
 				methodCache.put( "getTypeId", getNMSClass( "NBTBase" ).getMethod( "getTypeId" ) );
 				methodCache.put( "add", getNMSClass( "NBTTagList" ).getMethod( "add", int.class, getNMSClass( "NBTBase" ) ) );
-				methodCache.put( "size", getNMSClass( "NBTTagList" ).getMethod( "size" ) );
 			} else {
 				methodCache.put( "add", getNMSClass( "NBTTagList" ).getMethod( "add", getNMSClass( "NBTBase" ) ) );
 			}
-			
+			methodCache.put( "size", getNMSClass( "NBTTagList" ).getMethod( "size" ) );
+
 			if ( LOCAL_VERSION == MinecraftVersion.v1_8 ) {
 				methodCache.put( "listRemove", getNMSClass( "NBTTagList" ).getMethod( "a", int.class )  );
 			} else {
 				methodCache.put( "listRemove", getNMSClass( "NBTTagList" ).getMethod( "remove", int.class )  );
 			}
 			methodCache.put( "remove", getNMSClass( "NBTTagCompound" ).getMethod( "remove", String.class ) );
-			
+
+			if ( LOCAL_VERSION.greaterThanOrEqualTo( MinecraftVersion.v1_13 ) ) {
+				methodCache.put( "getKeys", getNMSClass( "NBTTagCompound" ).getMethod( "getKeys" ) );
+			} else {
+				methodCache.put( "getKeys", getNMSClass( "NBTTagCompound" ).getMethod( "c" ) );
+			}
+
 			methodCache.put( "hasTag", getNMSClass( "ItemStack" ).getMethod( "hasTag" ) );
 			methodCache.put( "getTag", getNMSClass( "ItemStack" ).getMethod( "getTag" ) );
 			methodCache.put( "setTag", getNMSClass( "ItemStack" ).getMethod( "setTag", getNMSClass( "NBTTagCompound" ) ) );
@@ -123,13 +132,13 @@ public final class NBTEditor {
 			methodCache.put( "setEntityTag", getNMSClass( "Entity" ).getMethod( "f", getNMSClass( "NBTTagCompound" ) ) );
 
 			methodCache.put( "save", getNMSClass( "ItemStack" ).getMethod( "save", getNMSClass( "NBTTagCompound" ) ) );
-			
+
 			if ( LOCAL_VERSION.lessThanOrEqualTo( MinecraftVersion.v1_10 ) ) {
 				methodCache.put( "createStack", getNMSClass( "ItemStack" ).getMethod( "createStack", getNMSClass( "NBTTagCompound" ) ) );
 			} else if ( LOCAL_VERSION.greaterThanOrEqualTo( MinecraftVersion.v1_13 ) ) {
 				methodCache.put( "createStack", getNMSClass( "ItemStack" ).getMethod( "a", getNMSClass( "NBTTagCompound" ) ) );
 			}
-			
+
 			if ( LOCAL_VERSION.greaterThanOrEqualTo( MinecraftVersion.v1_12 )) {
 				methodCache.put( "setTileTag", getNMSClass( "TileEntity" ).getMethod( "load", getNMSClass( "NBTTagCompound" ) ) );
 			} else {
@@ -137,9 +146,14 @@ public final class NBTEditor {
 			}
 			methodCache.put( "getTileEntity", getNMSClass( "World" ).getMethod( "getTileEntity", getNMSClass( "BlockPosition" ) ) );
 			methodCache.put( "getWorldHandle", getNMSClass( "CraftWorld" ).getMethod( "getHandle" ) );
-			
-			methodCache.put( "setGameProfile", getNMSClass( "TileEntitySkull" ).getMethod( "setGameProfile", GameProfile.class ) );
-			
+
+			methodCache.put( "setGameProfile", getNMSClass( "TileEntitySkull" ).getMethod( "setGameProfile", getNMSClass( "GameProfile" ) ) );
+			methodCache.put( "getProperties", getNMSClass( "GameProfile" ).getMethod( "getProperties" ) );
+			methodCache.put( "getName", getNMSClass( "Property" ).getMethod( "getName" ) );
+			methodCache.put( "getValue", getNMSClass( "Property" ).getMethod( "getValue" ) );
+			methodCache.put( "values", getNMSClass( "PropertyMap" ).getMethod( "values" ) );
+			methodCache.put( "put", getNMSClass( "PropertyMap" ).getMethod( "put", Object.class, Object.class ) );
+
 			methodCache.put( "loadNBTTagCompound", getNMSClass( "MojangsonParser" ).getMethod( "parse", String.class ) );
 		} catch( Exception e ) {
 			e.printStackTrace();
@@ -156,9 +170,9 @@ public final class NBTEditor {
 		} catch( Exception exception ) {
 			exception.printStackTrace();
 		}
-		
+
 		try {
-			methodCache.put( "setProfile", getNMSClass( "CraftMetaSkull" ).getDeclaredMethod( "setProfile", GameProfile.class ) );
+			methodCache.put( "setProfile", getNMSClass( "CraftMetaSkull" ).getDeclaredMethod( "setProfile", getNMSClass( "GameProfile" ) ) );
 			methodCache.get( "setProfile" ).setAccessible( true );
 		} catch( NoSuchMethodException exception ) {
 			// The method doesn't exist, so it's before 1.15.2
@@ -167,6 +181,7 @@ public final class NBTEditor {
 		constructorCache = new HashMap< Class< ? >, Constructor< ? > >();
 		try {
 			constructorCache.put( getNBTTag( Byte.class ), getNBTTag( Byte.class ).getDeclaredConstructor( byte.class ) );
+			constructorCache.put( getNBTTag( Boolean.class ), getNBTTag( Boolean.class ).getDeclaredConstructor( byte.class ) );
 			constructorCache.put( getNBTTag( String.class ), getNBTTag( String.class ).getDeclaredConstructor( String.class ) );
 			constructorCache.put( getNBTTag( Double.class ), getNBTTag( Double.class ).getDeclaredConstructor( double.class ) );
 			constructorCache.put( getNBTTag( Integer.class ), getNBTTag( Integer.class ).getDeclaredConstructor( int.class ) );
@@ -175,21 +190,24 @@ public final class NBTEditor {
 			constructorCache.put( getNBTTag( Short.class ), getNBTTag( Short.class ).getDeclaredConstructor( short.class ) );
 			constructorCache.put( getNBTTag( Class.forName( "[B" ) ), getNBTTag( Class.forName( "[B" ) ).getDeclaredConstructor( Class.forName( "[B" ) ) );
 			constructorCache.put( getNBTTag( Class.forName( "[I" ) ), getNBTTag( Class.forName( "[I" ) ).getDeclaredConstructor( Class.forName( "[I" ) ) );
-			
+
 			// This is for 1.15 since Mojang decided to make the constructors private
 			for ( Constructor< ? > cons : constructorCache.values() ) {
 				cons.setAccessible( true );
 			}
-			
+
 			constructorCache.put( getNMSClass( "BlockPosition" ), getNMSClass( "BlockPosition" ).getConstructor( int.class, int.class, int.class ) );
-			
+
+			constructorCache.put( getNMSClass( "GameProfile" ), getNMSClass( "GameProfile" ).getConstructor( UUID.class, String.class ) );
+			constructorCache.put( getNMSClass( "Property" ), getNMSClass( "Property" ).getConstructor( String.class, String.class ) );
+
 			if ( LOCAL_VERSION == MinecraftVersion.v1_11 || LOCAL_VERSION == MinecraftVersion.v1_12 ) {
 				constructorCache.put( getNMSClass( "ItemStack" ), getNMSClass( "ItemStack" ).getConstructor( getNMSClass( "NBTTagCompound" ) ) );
 			}
 		} catch( Exception e ) {
 			e.printStackTrace();
 		}
-		
+
 		NBTTagFieldCache = new HashMap< Class< ? >, Field >();
 		try {
 			for ( Class< ? > clazz : NBTClasses.values() ) {
@@ -252,7 +270,7 @@ public final class NBTEditor {
 			return null;
 		}
 	}
-	
+
 	private static String getMatch( String string, String regex ) {
 		Pattern pattern = Pattern.compile( regex );
 		Matcher matcher = pattern.matcher( string );
@@ -262,7 +280,7 @@ public final class NBTEditor {
 			return null;
 		}
 	}
-	
+
 	private static Object createItemStack( Object compound ) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException, InstantiationException {
 		if ( LOCAL_VERSION == MinecraftVersion.v1_11 || LOCAL_VERSION == MinecraftVersion.v1_12 ) {
 			return getConstructor( getNMSClass( "ItemStack" ) ).newInstance( compound );
@@ -299,10 +317,16 @@ public final class NBTEditor {
 			return head;
 		}
 		ItemMeta headMeta = head.getItemMeta();
-		GameProfile profile = new GameProfile( UUID.randomUUID(), null);
-		byte[] encodedData = Base64.getEncoder().encode( String.format( "{textures:{SKIN:{\"url\":\"%s\"}}}", skinURL ).getBytes() );
-		profile.getProperties().put("textures", new Property("textures", new String(encodedData)));
-		
+		Object profile = null;
+		try {
+			profile = getConstructor( getNMSClass( "GameProfile" ) ).newInstance( UUID.randomUUID(), null );
+			Object propertyMap = getMethod( "getProperties" ).invoke( profile );
+			Object textureProperty = getConstructor( getNMSClass( "Property" ) ).newInstance( "textures", new String( Base64.getEncoder().encode( String.format( "{textures:{SKIN:{\"url\":\"%s\"}}}", skinURL ).getBytes() ) ) );
+			getMethod( "put" ).invoke( propertyMap, "textures", textureProperty );
+		} catch ( IllegalAccessException | IllegalArgumentException | InvocationTargetException | InstantiationException e1 ) {
+			e1.printStackTrace();
+		}
+
 		if ( methodCache.containsKey( "setProfile" ) ) {
 			try {
 				getMethod( "setProfile" ).invoke( headMeta, profile );
@@ -326,7 +350,7 @@ public final class NBTEditor {
 		head.setItemMeta(headMeta);
 		return head;
 	}
-	
+
 	/**
 	 * Fetches the texture of a skull
 	 * 
@@ -346,38 +370,47 @@ public final class NBTEditor {
 		}
 		profileField.setAccessible(true);
 		try {
-			GameProfile profile = ( GameProfile ) profileField.get( meta );
+			Object profile = profileField.get( meta );
 			if ( profile == null ) {
 				return null;
 			}
 
-			for ( Property prop : profile.getProperties().values() ) {
-				if ( prop.getName().equals( "textures" ) ) {
-					String texture = new String( Base64.getDecoder().decode( prop.getValue() ) );
+			Collection< Object > properties = ( Collection< Object > ) getMethod( "values" ).invoke( getMethod( "getProperties" ).invoke( profile ) );
+			for ( Object prop : properties ) {
+				if ( "textures".equals( getMethod( "getName" ).invoke( prop ) ) ) {
+					String texture = new String( Base64.getDecoder().decode( ( String ) getMethod( "getValue" ).invoke( prop ) ) );
 					return getMatch( texture, "\\{\"url\":\"(.*?)\"\\}" );
 				}
 			}
 			return null;
-		} catch ( IllegalArgumentException | IllegalAccessException | SecurityException e) {
+		} catch ( IllegalArgumentException | IllegalAccessException | SecurityException | InvocationTargetException e) {
 			e.printStackTrace();
 			return null;
 		}
 	}
 
 	/**
-	 * @deprecated
-	 * 
 	 * Gets an NBT tag in a given item with the specified keys
 	 * 
 	 * @param item
 	 * The itemstack to get the keys from
-	 * @return
-	 * The item represented by the keys, and an integer if it is showing how long a list is.
 	 * @param keys
 	 * The keys to fetch; an integer after a key value indicates that it should get the nth place of
 	 * the previous compound because it is a list;
+	 * @return
+	 * The item represented by the keys, and an integer if it is showing how long a list is.
 	 */
-	public static Object getItemTag( ItemStack item, Object... keys ) {
+	private static Object getItemTag( ItemStack item, Object... keys ) {
+		try {
+			return getTag( getCompound( item ), keys );
+		} catch ( IllegalAccessException | IllegalArgumentException | InvocationTargetException e ) {
+			e.printStackTrace();
+			return null;
+		}
+	}
+
+	// Gets the NBTTagCompound
+	private static Object getCompound( ItemStack item ) {
 		if ( item == null ) {
 			return null;
 		}
@@ -393,7 +426,7 @@ public final class NBTEditor {
 				tag = getNMSClass( "NBTTagCompound" ).newInstance();
 			}
 
-			return getTag( tag, keys );
+			return tag;
 		} catch ( Exception exception ) {
 			exception.printStackTrace();
 			return null;
@@ -401,7 +434,7 @@ public final class NBTEditor {
 	}
 
 	/**
-	 * Gets an NBTCompound from the item provided
+	 * Gets an NBTCompound from the item provided. Use {@link #getNBTCompound(Object, Object...)} instead.
 	 * 
 	 * @param item
 	 * Itemstack
@@ -410,7 +443,7 @@ public final class NBTEditor {
 	 * @return
 	 * An NBTCompound
 	 */
-	public static NBTCompound getItemNBTTag( ItemStack item, Object... keys ) {
+	private static NBTCompound getItemNBTTag( ItemStack item, Object... keys ) {
 		if ( item == null ) {
 			return null;
 		}
@@ -419,7 +452,7 @@ public final class NBTEditor {
 			stack = getMethod( "asNMSCopy" ).invoke( null, item );
 
 			Object tag = getNMSClass( "NBTTagCompound" ).newInstance();
-			
+
 			tag = getMethod( "save" ).invoke( stack, tag );
 
 			return getNBTTag( tag, keys );
@@ -428,10 +461,8 @@ public final class NBTEditor {
 			return null;
 		}
 	}
-	
+
 	/**
-	 * @deprecated
-	 * 
 	 * Sets an NBT tag in an item with the provided keys and value
 	 * Should use the {@link #set(Object, Object, Object...)} method instead
 	 * 
@@ -444,7 +475,7 @@ public final class NBTEditor {
 	 * @return
 	 * A new ItemStack with the updated NBT tags
 	 */
-	public static ItemStack setItemTag( ItemStack item, Object value, Object... keys ) {
+	private static ItemStack setItemTag( ItemStack item, Object value, Object... keys ) {
 		if ( item == null ) {
 			return null;
 		}
@@ -458,7 +489,7 @@ public final class NBTEditor {
 			} else {
 				tag = getNMSClass( "NBTTagCompound" ).newInstance();
 			}
-		
+
 			if ( keys.length == 0 && value instanceof NBTCompound ) {
 				tag = ( ( NBTCompound ) value ).tag;
 			} else {
@@ -472,7 +503,7 @@ public final class NBTEditor {
 			return null;
 		}
 	}
-	
+
 	/**
 	 * Constructs an ItemStack from a given NBTCompound
 	 * 
@@ -490,13 +521,11 @@ public final class NBTEditor {
 			Object count = getTag( tag, "Count" );
 			Object id = getTag( tag, "id" );
 			if ( count == null || id == null ) {
-				System.out.println( "Missing count and id" );
 				return null;
 			}
 			if ( count instanceof Byte && id instanceof String ) {
 				return ( ItemStack ) getMethod( "asBukkitCopy" ).invoke( null, createItemStack( tag ) );
 			}
-			System.out.println( count.getClass() + ":" + id.getClass() );
 			return null;
 		} catch ( Exception exception ) {
 			exception.printStackTrace();
@@ -505,8 +534,6 @@ public final class NBTEditor {
 	}
 
 	/**
-	 * @deprecated
-	 * 
 	 * Gets an NBT tag in a given entity with the specified keys
 	 * 
 	 * @param entity
@@ -517,7 +544,17 @@ public final class NBTEditor {
 	 * @return
 	 * The item represented by the keys, and an integer if it is showing how long a list is.
 	 */
-	public static Object getEntityTag( Entity entity, Object... keys ) {
+	private static Object getEntityTag( Entity entity, Object... keys ) {
+		try {
+			return getTag( getCompound( entity ), keys );
+		} catch ( IllegalAccessException | IllegalArgumentException | InvocationTargetException e ) {
+			e.printStackTrace();
+			return null;
+		}
+	}
+
+	// Gets the NBTTagCompound
+	private static Object getCompound( Entity entity ) {
 		if ( entity == null ) {
 			return entity;
 		}
@@ -528,15 +565,15 @@ public final class NBTEditor {
 
 			getMethod( "getEntityTag" ).invoke( NMSEntity, tag );
 
-			return getTag( tag, keys );
+			return tag;
 		} catch ( Exception exception ) {
 			exception.printStackTrace();
 			return null;
 		}
 	}
-	
+
 	/**
-	 * Gets an NBTCompound from the entity provided
+	 * Gets an NBTCompound from the entity provided. Use {@link #getNBTCompound(Object, Object...)} instead.
 	 * 
 	 * @param entity
 	 * The Bukkit entity provided
@@ -545,7 +582,7 @@ public final class NBTEditor {
 	 * @return
 	 * An NBTCompound
 	 */
-	public static NBTCompound getEntityNBTTag( Entity entity, Object...keys ) {
+	private static NBTCompound getEntityNBTTag( Entity entity, Object...keys ) {
 		if ( entity == null ) {
 			return null;
 		}
@@ -564,8 +601,6 @@ public final class NBTEditor {
 	}
 
 	/**
-	 * @deprecated
-	 * 
 	 * Sets an NBT tag in an entity with the provided keys and value
 	 * Should use the {@link #set(Object, Object, Object...)} method instead
 	 * 
@@ -576,7 +611,7 @@ public final class NBTEditor {
 	 * @param keys
 	 * The keys to set, String for NBTCompound, int or null for an NBTTagList
 	 */
-	public static void setEntityTag( Entity entity, Object value, Object... keys ) {
+	private static void setEntityTag( Entity entity, Object value, Object... keys ) {
 		if ( entity == null ) {
 			return;
 		}
@@ -603,7 +638,7 @@ public final class NBTEditor {
 	/**
 	 * @deprecated
 	 * 
-	 * Gets an NBT tag in a given block with the specified keys
+	 * Gets an NBT tag in a given block with the specified keys. Use {@link #getNBTCompound(Object, Object...)} instead.
 	 * 
 	 * @param block
 	 * The block to get the keys from
@@ -615,28 +650,38 @@ public final class NBTEditor {
 	 */
 	public static Object getBlockTag( Block block, Object... keys ) {
 		try {
+			return getTag( getCompound( block ), keys );
+		} catch ( IllegalAccessException | IllegalArgumentException | InvocationTargetException e ) {
+			e.printStackTrace();
+			return null;
+		}
+	}
+
+	// Gets the NBTTagCompound
+	private static Object getCompound( Block block ) {
+		try {
 			if ( block == null || !getNMSClass( "CraftBlockState" ).isInstance( block.getState() ) ) {
 				return null;
 			}
 			Location location = block.getLocation();
-			
+
 			Object blockPosition = getConstructor( getNMSClass( "BlockPosition" ) ).newInstance( location.getBlockX(), location.getBlockY(), location.getBlockZ() );
 
 			Object nmsWorld = getMethod( "getWorldHandle" ).invoke( location.getWorld() );
-			
+
 			Object tileEntity = getMethod( "getTileEntity" ).invoke( nmsWorld, blockPosition );
 
 			Object tag = getNMSClass( "NBTTagCompound" ).newInstance();
-			
+
 			getMethod( "getTileTag" ).invoke( tileEntity, tag );
 
-			return getTag( tag, keys );
+			return tag;
 		} catch( Exception exception ) {
 			exception.printStackTrace();
 			return null;
 		}
 	}
-	
+
 	/**
 	 * Gets an NBTCompound from the block provided
 	 * 
@@ -653,15 +698,15 @@ public final class NBTEditor {
 				return null;
 			}
 			Location location = block.getLocation();
-			
+
 			Object blockPosition = getConstructor( getNMSClass( "BlockPosition" ) ).newInstance( location.getBlockX(), location.getBlockY(), location.getBlockZ() );
 
 			Object nmsWorld = getMethod( "getWorldHandle" ).invoke( location.getWorld() );
-			
+
 			Object tileEntity = getMethod( "getTileEntity" ).invoke( nmsWorld, blockPosition );
 
 			Object tag = getNMSClass( "NBTTagCompound" ).newInstance();
-			
+
 			getMethod( "getTileTag" ).invoke( tileEntity, tag );
 
 			return getNBTTag( tag, keys );
@@ -698,7 +743,7 @@ public final class NBTEditor {
 			Object tileEntity = getMethod( "getTileEntity" ).invoke( nmsWorld, blockPosition );
 
 			Object tag = getNMSClass( "NBTTagCompound" ).newInstance();
-			
+
 			getMethod( "getTileTag" ).invoke( tileEntity, tag );
 
 			if ( keys.length == 0 && value instanceof NBTCompound ) {
@@ -713,7 +758,7 @@ public final class NBTEditor {
 			return;
 		}
 	}
-	
+
 	/**
 	 * Sets the texture of a skull block
 	 * 
@@ -723,12 +768,14 @@ public final class NBTEditor {
 	 * The URL of the skin
 	 */
 	public static void setSkullTexture( Block block, String texture ) {
-		GameProfile profile = new GameProfile( UUID.randomUUID(), null );
-		profile.getProperties().put( "textures", new com.mojang.authlib.properties.Property( "textures", new String( Base64.getEncoder().encode( String.format( "{textures:{SKIN:{\"url\":\"%s\"}}}", texture ).getBytes() ) ) ) );
-		
 		try {
-			Location location = block.getLocation();
+			Object profile = getConstructor( getNMSClass( "GameProfile" ) ).newInstance( UUID.randomUUID(), null );
+			Object propertyMap = getMethod( "getProperties" ).invoke( profile );
+			Object textureProperty = getConstructor( getNMSClass( "Property" ) ).newInstance( "textures", new String( Base64.getEncoder().encode( String.format( "{textures:{SKIN:{\"url\":\"%s\"}}}", texture ).getBytes() ) ) );
+			getMethod( "put" ).invoke( propertyMap, "textures", textureProperty );
 			
+			Location location = block.getLocation();
+
 			Object blockPosition = getConstructor( getNMSClass( "BlockPosition" ) ).newInstance( location.getBlockX(), location.getBlockY(), location.getBlockZ() );
 
 			Object nmsWorld = getMethod( "getWorldHandle" ).invoke( location.getWorld() );
@@ -740,7 +787,7 @@ public final class NBTEditor {
 			exception.printStackTrace();
 		}
 	}
-	
+
 	private static Object getValue( Object object, Object... keys ) {
 		if ( object instanceof ItemStack ) {
 			return getItemTag( ( ItemStack ) object, keys );
@@ -759,12 +806,48 @@ public final class NBTEditor {
 			throw new IllegalArgumentException( "Object provided must be of type ItemStack, Entity, Block, or NBTCompound!" );
 		}
 	}
-	
+
+	/**
+	 * Gets an NBTCompound from an object
+	 * 
+	 * @param object
+	 * Must be an ItemStack, Entity, Block, or NBTCompound
+	 * @param keys
+	 * Keys in descending order
+	 * @return
+	 * An NBTCompound, or null if none is stored at the provided location
+	 */
+	public static NBTCompound getNBTCompound( Object object, Object... keys ) {
+		if ( object instanceof ItemStack ) {
+			return getItemNBTTag( ( ItemStack ) object, keys );
+		} else if ( object instanceof Entity ) {
+			return getEntityNBTTag( ( Entity ) object, keys );
+		} else if ( object instanceof Block ) {
+			return getBlockNBTTag( ( Block ) object, keys );
+		} else if ( object instanceof NBTCompound ) {
+			try {
+				return getNBTTag( ( ( NBTCompound ) object ).tag, keys );
+			} catch ( IllegalAccessException | IllegalArgumentException | InvocationTargetException e ) {
+				e.printStackTrace();
+				return null;
+			}
+		} else if ( getNMSClass( "NBTTagCompound" ).isInstance( object ) ) {
+			try {
+				return getNBTTag( object, keys );
+			} catch ( IllegalAccessException | IllegalArgumentException | InvocationTargetException e ) {
+				e.printStackTrace();
+				return null;
+			}
+		} else {
+			throw new IllegalArgumentException( "Object provided must be of type ItemStack, Entity, Block, or NBTCompound!" );
+		}
+	}
+
 	/**
 	 * Gets a string from an object
 	 * 
 	 * @param object
-	 * Must be an ItemStack, Entity, or Block
+	 * Must be an ItemStack, Entity, Block, or NBTCompound
 	 * @param keys
 	 * Keys in descending order
 	 * @return
@@ -774,12 +857,12 @@ public final class NBTEditor {
 		Object result = getValue( object, keys );
 		return result instanceof String ? ( String ) result : null;
 	}
-	
+
 	/**
 	 * Gets an int from an object
 	 * 
 	 * @param object
-	 * Must be an ItemStack, Entity, or Block
+	 * Must be an ItemStack, Entity, Block, or NBTCompound
 	 * @param keys
 	 * Keys in descending order
 	 * @return
@@ -789,12 +872,12 @@ public final class NBTEditor {
 		Object result = getValue( object, keys );
 		return result instanceof Integer ? ( int ) result : 0;
 	}
-	
+
 	/**
 	 * Gets a double from an object
 	 * 
 	 * @param object
-	 * Must be an ItemStack, Entity, or Block
+	 * Must be an ItemStack, Entity, Block, or NBTCompound
 	 * @param keys
 	 * Keys in descending order
 	 * @return
@@ -804,12 +887,12 @@ public final class NBTEditor {
 		Object result = getValue( object, keys );
 		return result instanceof Double ? ( double ) result : 0;
 	}
-	
+
 	/**
 	 * Gets a long from an object
 	 * 
 	 * @param object
-	 * Must be an ItemStack, Entity, or Block
+	 * Must be an ItemStack, Entity, Block, or NBTCompound
 	 * @param keys
 	 * Keys in descending order
 	 * @return
@@ -819,12 +902,12 @@ public final class NBTEditor {
 		Object result = getValue( object, keys );
 		return result instanceof Long ? ( long ) result : 0;
 	}
-	
+
 	/**
 	 * Gets a float from an object
 	 * 
 	 * @param object
-	 * Must be an ItemStack, Entity, or Block
+	 * Must be an ItemStack, Entity, Block, or NBTCompound
 	 * @param keys
 	 * Keys in descending order
 	 * @return
@@ -834,12 +917,12 @@ public final class NBTEditor {
 		Object result = getValue( object, keys );
 		return result instanceof Float ? ( float ) result : 0;
 	}
-	
+
 	/**
 	 * Gets a short from an object
 	 * 
 	 * @param object
-	 * Must be an ItemStack, Entity, or Block
+	 * Must be an ItemStack, Entity, Block, or NBTCompound
 	 * @param keys
 	 * Keys in descending order
 	 * @return
@@ -849,12 +932,12 @@ public final class NBTEditor {
 		Object result = getValue( object, keys );
 		return result instanceof Short ? ( short ) result : 0;
 	}
-	
+
 	/**
 	 * Gets a byte from an object
 	 * 
 	 * @param object
-	 * Must be an ItemStack, Entity, or Block
+	 * Must be an ItemStack, Entity, Block, or NBTCompound
 	 * @param keys
 	 * Keys in descending order
 	 * @return
@@ -864,12 +947,26 @@ public final class NBTEditor {
 		Object result = getValue( object, keys );
 		return result instanceof Byte ? ( byte ) result : 0;
 	}
-	
+
+	/**
+	 * Gets a boolean from an object
+	 *
+	 * @param object
+	 * Must be an ItemStack, Entity, Block, or NBTCompound
+	 * @param keys
+	 * Keys in descending order
+	 * @return
+	 * A boolean or false if none is stored at the provided location
+	 */
+	public static boolean getBoolean( Object object, Object... keys ) {
+		return getByte( object, keys ) == 1;
+	}
+
 	/**
 	 * Gets a byte array from an object
 	 * 
 	 * @param object
-	 * Must be an ItemStack, Entity, or Block
+	 * Must be an ItemStack, Entity, Block, or NBTCompound
 	 * @param keys
 	 * Keys in descending order
 	 * @return
@@ -879,12 +976,12 @@ public final class NBTEditor {
 		Object result = getValue( object, keys );
 		return result instanceof byte[] ? ( byte[] ) result : null;
 	}
-	
+
 	/**
 	 * Gets an int array from an object
 	 * 
 	 * @param object
-	 * Must be an ItemStack, Entity, or Block
+	 * Must be an ItemStack, Entity, Block, or NBTCompound
 	 * @param keys
 	 * Keys in descending order
 	 * @return
@@ -894,12 +991,12 @@ public final class NBTEditor {
 		Object result = getValue( object, keys );
 		return result instanceof int[] ? ( int[] ) result : null;
 	}
-	
+
 	/**
 	 * Checks if the object contains the given key
 	 * 
 	 * @param object
-	 * Must be an ItemStack, Entity, or Block
+	 * Must be an ItemStack, Entity, Block, or NBTCompound
 	 * @param keys
 	 * Keys in descending order
 	 * @return
@@ -909,14 +1006,94 @@ public final class NBTEditor {
 		Object result = getValue( object, keys );
 		return result != null;
 	}
-	
+
+	/**
+	 * Get the keys at the specific location, if it is a compound.
+	 * 
+	 * @param object
+	 * Must be an ItemStack, Entity, Block, or NBTCompound
+	 * @param keys
+	 * Keys in descending order
+	 * @return
+	 * A set of keys
+	 */
+	public static Collection< String > getKeys( Object object, Object... keys ) {
+		Object compound;
+		if ( object instanceof ItemStack ) {
+			compound = getCompound( ( ItemStack ) object );
+		} else if ( object instanceof Entity ) {
+			compound = getCompound( ( Entity ) object );
+		} else if ( object instanceof Block ) {
+			compound = getCompound( ( Block ) object );
+		} else if ( object instanceof NBTCompound ) {
+			compound = ( ( NBTCompound ) object ).tag;
+		} else {
+			throw new IllegalArgumentException( "Object provided must be of type ItemStack, Entity, Block, or NBTCompound!" );
+		}
+
+		try {
+			NBTCompound nbtCompound = getNBTTag( compound, keys );
+
+			Object tag = nbtCompound.tag;
+			if ( getNMSClass( "NBTTagCompound" ).isInstance( tag ) ) {
+				return ( Collection< String > ) getMethod( "getKeys" ).invoke( tag );
+			} else {
+				return null;
+			}
+
+		} catch ( IllegalAccessException | IllegalArgumentException | InvocationTargetException e ) {
+			e.printStackTrace();
+		}
+
+		return null;
+	}
+
+	/**
+	 * Gets the size of the list or NBTCompound at the given location.
+	 * 
+	 * @param object
+	 * Must be an ItemStack, Entity, Block, or NBTCompound
+	 * @param keys
+	 * Keys in descending order
+	 * @return
+	 * The size of the list or compound at the given location.
+	 */
+	public static int getSize( Object object, Object... keys ) {
+		Object compound;
+		if ( object instanceof ItemStack ) {
+			compound = getCompound( ( ItemStack ) object );
+		} else if ( object instanceof Entity ) {
+			compound = getCompound( ( Entity ) object );
+		} else if ( object instanceof Block ) {
+			compound = getCompound( ( Block ) object );
+		} else if ( object instanceof NBTCompound ) {
+			compound = ( ( NBTCompound ) object ).tag;
+		} else {
+			throw new IllegalArgumentException( "Object provided must be of type ItemStack, Entity, Block, or NBTCompound!" );
+		}
+
+		try {
+			NBTCompound nbtCompound = getNBTTag( compound, keys );
+			if ( getNMSClass( "NBTTagCompound" ).isInstance( nbtCompound.tag ) ) {
+				return getKeys( nbtCompound ).size();
+			} else if ( getNMSClass( "NBTTagList" ).isInstance( nbtCompound.tag ) ) {
+				return ( int ) getMethod( "size" ).invoke( nbtCompound.tag );
+			}
+		} catch ( IllegalAccessException | IllegalArgumentException | InvocationTargetException e ) {
+			e.printStackTrace();
+			return 0;
+		}
+
+		throw new IllegalArgumentException( "Value is not a compound or list!" );
+	}
+
 	/**
 	 * Sets the value in the object with the given keys
 	 * 
 	 * @param <T>
-	 * An ItemStack, Entity, Block, or NBTCompound
+	 * ItemStack, Entity, Block, or NBTCompound.
 	 * @param object
-	 * Must be an ItemStack, Entity, or Block
+	 * Must be an ItemStack, Entity, Block, or NBTCompound
 	 * @param value
 	 * The value to set, can be an NBTCompound
 	 * @param keys
@@ -942,7 +1119,7 @@ public final class NBTEditor {
 		}
 		return object;
 	}
-	
+
 	/**
 	 * Load an NBTCompound from a String.
 	 * 
@@ -954,7 +1131,7 @@ public final class NBTEditor {
 	public static NBTCompound getNBTCompound( String json ) {
 		return NBTCompound.fromJson( json );
 	}
-	
+
 	/**
 	 * Get an empty NBTCompound.
 	 * 
@@ -969,7 +1146,7 @@ public final class NBTEditor {
 			return null;
 		}
 	}
-	
+
 	private static void setTag( Object tag, Object value, Object... keys ) throws InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
 		Object notCompound;
 		// Get the real value of what we want to set here
@@ -979,6 +1156,9 @@ public final class NBTEditor {
 			} else if ( getNMSClass( "NBTTagList" ).isInstance( value ) || getNMSClass( "NBTTagCompound" ).isInstance( value ) ) {
 				notCompound = value;
 			} else {
+				if ( value instanceof Boolean ) {
+					value = ( byte ) ( ( Boolean ) value == true ? 1 : 0 );
+				}
 				notCompound = getConstructor( getNBTTag( value.getClass() ) ).newInstance( value );
 			}
 		} else {
@@ -1040,7 +1220,7 @@ public final class NBTEditor {
 
 	private static NBTCompound getNBTTag( Object tag, Object...keys ) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
 		Object compound = tag;
-		
+
 		for ( Object key : keys ) {
 			if ( compound == null ) {
 				return null;
@@ -1052,7 +1232,7 @@ public final class NBTEditor {
 		}
 		return new NBTCompound( compound );
 	}
-	
+
 	private static Object getTag( Object tag, Object... keys ) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
 		if ( keys.length == 0 ) {
 			return getTags( tag );
@@ -1113,17 +1293,17 @@ public final class NBTEditor {
 			return tags;
 		}
 	}
-	
+
 	/**
 	 * A class for holding NBTTagCompounds
 	 */
 	public static final class NBTCompound {
 		protected final Object tag;
 
-		public NBTCompound( @Nonnull Object tag ) {
+		protected NBTCompound( @Nonnull Object tag ) {
 			this.tag = tag;
 		}
-		
+
 		public void set( Object value, Object... keys ) {
 			try {
 				setTag( tag, value, keys );
@@ -1131,7 +1311,7 @@ public final class NBTEditor {
 				e.printStackTrace();
 			}
 		}
-		
+
 		/**
 		 * The exact same as the toString method
 		 * 
@@ -1150,7 +1330,7 @@ public final class NBTEditor {
 				return null;
 			}
 		}
-		
+
 		@Override
 		public String toString() {
 			return tag.toString();
@@ -1178,7 +1358,7 @@ public final class NBTEditor {
 			return true;
 		}
 	}
-	
+
 	private enum MinecraftVersion {
 		v1_8( "1_8", 0 ),
 		v1_9( "1_9", 1 ),
@@ -1188,24 +1368,24 @@ public final class NBTEditor {
 		v1_13( "1_13", 5 ),
 		v1_14( "1_14", 6 ),
 		v1_15( "1_15", 7 );
-		
+
 		private int order;
 		private String key;
-		
+
 		MinecraftVersion( String key, int v ) {
 			this.key = key;
 			order = v;
 		}
-		
+
 		// Would be really cool if we could overload operators here
 		public boolean greaterThanOrEqualTo( MinecraftVersion other ) {
 			return order >= other.order;
 		}
-		
+
 		public boolean lessThanOrEqualTo( MinecraftVersion other ) {
 			return order <= other.order;
 		}
-		
+
 		public static MinecraftVersion get( String v ) {
 			for ( MinecraftVersion k : MinecraftVersion.values() ) {
 				if ( v.contains( k.key ) ) {
